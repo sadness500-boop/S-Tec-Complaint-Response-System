@@ -1,0 +1,65 @@
+# S-Tec Complaint Response System
+
+<img src="icons/icon-192.png" width="96" alt="S-Tec Complaint 아이콘">
+
+**에스텍 그룹 고객사 Complaint 대응 프로그램** · v1.1.0
+
+고객사가 제기한 Complaint를 **① 발생 사업장 선정 → ② 대·중·소 분류 → ③ 내용 작성 → ④ 출력** 순서로 처리하면,
+대응방안을 **Word(머리글·바닥글 서식) · PPT(16:9) · PDF(PPT와 같은 디자인)** 3종으로 바로 만들어 줍니다. 웹 버전과 안드로이드 앱(APK)으로 씁니다.
+
+## 내려받기
+
+| 구분 | 파일 | 주소 |
+|---|---|---|
+| 웹 버전 | [index.html](index.html) | https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/ |
+| 웹 버전 (버전별) | [releases/S-Tec-Complaint-Response-System_v1.1.0.html](releases/S-Tec-Complaint-Response-System_v1.1.0.html) | |
+| 안드로이드 앱 (최신) | `stcr-latest.apk` | https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk |
+| 안드로이드 앱 (버전별) | `releases/S-Tec-Complaint-Response-System_v1.1.0.apk` | 릴리스 `v1.1.0` |
+
+- **APK는 GitHub Actions가 만듭니다.** `index.html` 또는 `version.json`을 올리면 Actions 탭의 "Android APK"가 실행되어 약 5분 뒤 `releases/` 폴더와 릴리스에 버전 이름이 붙은 APK가 올라갑니다. Actions 탭 › Android APK › Run workflow 로 직접 실행할 수도 있습니다.
+- **안드로이드 설치:** APK 내려받기 → "출처를 알 수 없는 앱 설치 허용" → 설치. Play 프로텍트 경고가 뜨면 "무시하고 설치".
+- 서명 키(`android-keystore/stcr-debug.keystore`)를 고정해 두었으므로 새 버전은 지우지 않고 덮어 설치하면 됩니다.
+- **웹 버전 주소를 열려면** 저장소 Settings › Pages › Branch를 `main` / `/(root)` 로 한 번 켜야 합니다.
+- 웹 버전은 인터넷 없이도 동작합니다(로그인·동기화만 인터넷 필요). 앱에서 출력한 파일은 「저장·보내기」 창으로 저장하거나 카카오톡 등으로 보냅니다.
+
+## 주요 기능
+
+1. **상단 기능 (근태관리 프로그램과 동일)** — Complaint 담당 지정(지정해야 프로그램 구동, 사진·직책·담당 지사), 다운로드 QR(웹·앱), 친구 추천, 내 계정(로그인·관리자 페이지), 주간·야간·시스템 화면.
+2. **① 발생 사업장 선정** — 에스텍베스트 동부·서부·남부·중부 지사 **사업장 151곳**(사업장명·주소·계약일·유형·계약 업종·근무형태·계약 인원(남/여)·업종별 인원(보안/미화/기타)·현장 책임자·사업장 전화). 지사 버튼·검색으로 고르고, 목록에 없으면 직접 입력.
+3. **② Complaint 대·중·소 분류** — 대분류 8 · 중분류 26 · 소분류 80, 소항목별 심각도(중대/주요/일반)·즉시 조치·단기 개선·재발방지·근무자 조치 기준. 내용 키워드로 항목 추천.
+4. **③ 내용 작성** — 접수 정보·Complaint 내용·고객사 요구사항·사실관계, 고객사 제출용 / 내부 보고용 구분(제출용은 근무자 징계 내용 제외).
+5. **④ 대응방안 출력** — 주요 보고내용, 접수 개요, **발생 사업장 정보**, 4M 원인분석, 대응 방안(D+0 / D+1~7 / 재발방지), 법적 검토(56개 조항), 실행 일정(D+0~D+30), 고객사 회신(안). 화면에서 고친 내용이 그대로 출력됩니다.
+
+## 제작자 관리 (로그인)
+
+- [`auth-config.json`](auth-config.json)이 **Attendance Management Software와 같은 Supabase 서버**를 가리킵니다 → 하나의 아이디로 두 프로그램을 씁니다(통합 로그인). 관리자 페이지(내 계정 카드 › 관리자 페이지)에서 가입 승인·차단·사용기한·임시 비밀번호·강제 로그아웃·접속기록·기기 관리·앱 전체 잠금.
+- **따로 쓰려면:** 새 Supabase 프로젝트 → SQL Editor에서 [`server/supabase_setup.sql`](server/supabase_setup.sql) 실행(제작자 이메일 한 곳 수정) → `auth-config.json` 두 값 교체.
+- **끄는 법:** `auth-config.json` 의 `"enabled": false`.
+- 로그인하면 **Complaint 담당·화면 설정·출력 기록**이 계정에 저장되어 여러 기기에서 똑같이 보입니다.
+- publishable(anon) 키는 공개돼도 되는 키입니다. **secret / service_role 키는 절대 저장소·앱에 넣지 마세요.**
+
+## 개인정보
+
+- 공개 저장소이므로 사업장 현장 책임자 **휴대폰 번호 뒷자리는 `????`로 가렸습니다**(사업장 지도 프로그램과 같은 기준).
+- ※ 법령 요약은 실무 참고용입니다. 적용 전 국가법령정보센터(law.go.kr) 원문 및 노무 자문으로 확인하십시오.
+
+## 파일 구성
+
+```
+index.html                     프로그램 전체 (한 파일, 라이브러리 내장)
+releases/                      버전별 HTML · APK
+source/                        index.html 을 만드는 원본(app.js · ui.js · kb.js(분류·법령) · sites.js(사업장) · build.py)
+auth-config.json               로그인 서버 연결 설정
+server/supabase_setup.sql      로그인 서버(Supabase) 설정 SQL (별도 서버를 쓸 때)
+icons/ · manifest.webmanifest · sw.js   앱 아이콘 · 홈 화면 설치(PWA)
+package.json · capacitor.config.json · android-keystore/   안드로이드 앱 포장
+.github/workflows/android-apk.yml       안드로이드 앱 자동 빌드
+```
+
+## 변경 이력
+
+- **v1.1.0** (2026-11-14) — 상단 기능(Complaint 담당·다운로드 QR·친구 추천·로그인·주간/야간/시스템) 반영, 에스텍베스트 사업장 151곳 목록 반영(① 사업장 선정 → ② 분류 → ③ 작성 → ④ 출력), Word·PPT·PDF에 발생 사업장 정보(사업장 현황 슬라이드) 기재, 안드로이드 앱(APK) 자동 빌드
+- **v1.0.0** (2026-11-14) — 최초 버전: Complaint 대·중·소 분류, 대응방안 Word·PPT·PDF 3종 출력
+
+---
+Designed & Developed by **Rat Rae Choi**
