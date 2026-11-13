@@ -1,12 +1,12 @@
 /* =====================================================================
- * S-Tec Complaint Response System v1.2.0 — 앱 로직
+ * S-Tec Complaint Response System v1.3.0 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.2.0',
+  version: 'v1.3.0',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
@@ -245,6 +245,13 @@ function bullets(groups, o = {}) {
   });
   return out;
 }
+function imgPara(src, wIn, caption, dims) {
+  const d = dims || [16, 9], h = wIn * d[1] / d[0];
+  const out = [new docx.Paragraph({ alignment: docx.AlignmentType.CENTER, spacing: { before: 80, after: 30 }, keepNext: !!caption,
+    children: [new docx.ImageRun({ type: 'jpg', data: b64ToU8(dataUrlB64(src)), transformation: { width: Math.round(wIn * 96), height: Math.round(h * 96) } })] })];
+  if (caption) out.push(P([R(caption, { size: 16, color: C.gray, it: true })], { align: docx.AlignmentType.CENTER, after: 100 }));
+  return out;
+}
 function boxPara(paras, fill = 'F2F7F3', color = C.green) {
   const b = { style: docx.BorderStyle.SINGLE, size: 12, color };
   return table([[cell(paras, { w: CW, fill, borders: { top: b, bottom: b, left: b, right: b } })]], [CW]);
@@ -276,8 +283,16 @@ async function makeDocx(p) {
       ['계약 업종', s2.work || '-', '근무형태', s2.shift || '-'], ['계약 인원', `총 ${s2.total}명 (남 ${s2.m} · 여 ${s2.f})`, '업종별 인원', `보안 ${s2.sec} · 미화 ${s2.cln} · 기타 ${s2.etc}`],
       ['현장 책임자', [s2.pos, s2.mgr].filter(Boolean).join(' ') + (s2.mtel ? ` (${s2.mtel})` : '') || '-', '사업장 전화', s2.stel || '-']];
     if (s2.note) rows.push(['비고', s2.note, null, null]);
+    const fk = figName('dio', jobKey(p));
     const lab = t => td(t, 1500, { fill: 'E8F5EC', bold: true, align: docx.AlignmentType.CENTER, color: C.greenD });
-    ch.push(table(rows.map(r => r[2] === null ? [lab(r[0]), cell([P([R(r[1], { size: 19 })], { after: 0 })], { w: 8138, span: 3 })] : [lab(r[0]), td(r[1], 3319), lab(r[2]), td(r[3], 3319)]), w4));
+    const w5 = [1300, 2550, 1300, 2550, 1938];
+    const imgCell = new docx.TableCell({ rowSpan: rows.length, width: { size: w5[4], type: docx.WidthType.DXA }, verticalAlign: docx.VerticalAlign.CENTER, borders: bAll(), margins: { top: 60, bottom: 60, left: 60, right: 60 },
+      children: [new docx.Paragraph({ alignment: docx.AlignmentType.CENTER, children: [new docx.ImageRun({ type: 'jpg', data: b64ToU8(dataUrlB64(ASSET.fig[fk])), transformation: { width: 112, height: Math.round(112 * ASSET.figDim[fk][1] / ASSET.figDim[fk][0]) } })] }),
+        P([R(`${JOB_NAME[jobKey(p)]} 현장`, { size: 15, color: C.gray })], { align: docx.AlignmentType.CENTER, after: 0 })] });
+    const lab5 = t => td(t, 1300, { fill: 'E8F5EC', bold: true, align: docx.AlignmentType.CENTER, color: C.greenD });
+    ch.push(new docx.Table({ width: { size: 9638, type: docx.WidthType.DXA }, columnWidths: w5, rows: rows.map((r, i) => new docx.TableRow({ cantSplit: true, children:
+      (r[2] === null ? [lab5(r[0]), cell([P([R(r[1], { size: 19 })], { after: 0 })], { w: 6400, span: 3 })] : [lab5(r[0]), td(r[1], 2550), lab5(r[2]), td(r[3], 2550)])
+        .concat(i === 0 ? [imgCell] : []) })) }));
     ch.push(P([R('')], { after: 60 }));
   }
   const cw2 = [2000, 2600, 3638, 1400];
@@ -299,6 +314,7 @@ async function makeDocx(p) {
   ch.push(H1('Ⅳ. 대응 방안'));
   ch.push(H2('1. 즉시 조치 (D+0)')); ch.push(...bullets(parseGrp(p.imm)));
   ch.push(H2('2. 단기 개선 (D+1 ~ D+7)')); ch.push(...bullets(parseGrp(p.short)));
+  { const v = VIDEO_OF[jobKey(p)]; ch.push(...imgPara(ASSET.poster[v], 3.6, `▶ 현장 재교육 자료: ${VIDEO_TITLE[v]} (고객사 대응 PPT에서 재생)`, [16, 9])); }
   ch.push(H2('3. 재발방지 대책 (구조 개선)')); ch.push(...bullets(parseGrp(p.prev)));
   // Ⅴ 법적 검토
   ch.push(H1('Ⅴ. 법적 검토'));
@@ -324,6 +340,7 @@ async function makeDocx(p) {
   // 회신
   ch.push(H1(`${roman[n++]}. 고객사 회신(안)`));
   ch.push(boxPara(lines(p.reply).map(l => P([R(l, { size: 20 })], { after: 60, line: 300 })).concat([P([R(`${f.dept} 드림`, { size: 20, bold: true })], { align: docx.AlignmentType.RIGHT, before: 60, after: 0 })]), 'FFFFFF', C.navy));
+  ch.push(...imgPara(ASSET.fig.team, 2.3, 'The Best Choice, S-Tec — 에스텍 그룹이 약속드립니다', ASSET.figDim.team));
   ch.push(P([R('- 끝 -', { size: 20, bold: true })], { align: docx.AlignmentType.CENTER, before: 200, after: 120 }));
   ch.push(P([R(`※ 법령 요약은 실무 참고용입니다. 적용 전 국가법령정보센터(law.go.kr) 원문 및 노무 자문으로 확인하십시오.  |  ${APP.name} ${APP.version}`, { size: 15, color: '8A93A3' })], { align: docx.AlignmentType.CENTER }));
 
@@ -431,6 +448,45 @@ function grads() {
 }
 
 /* 공통 프레임: 상단 제목바 + 하단 바 */
+/* ---------- 현장 사진·영상 (★ Project Resources) ---------- */
+const VIDEO_OF = { sec: 'sec1', cln: 'cln', prk: 'prk', fac: 'fac', info: 'off', grd: 'grd', san: 'san1', spc: 'spc', off: 'off2' };
+const JOB_NAME = { sec: '보안', cln: '미화', prk: '주차', fac: '시설관리', info: '안내', grd: '경호', san: '소독방역', spc: '특수직군', off: '사무관리' };
+const VIDEO_TITLE = { sec1: '보안근무 영상', cln: '미화근무 영상', prk: '주차근무 영상', fac: '시설근무 영상', off2: '사무관리 영상', grd: '경호근무 영상', san1: '세니텍(소독방역) 근무 영상', spc: '특수직군 근무 영상' };
+function jobKey(p) {
+  const t = ((p.site && p.site.work) || '') + ' ' + (p.f.job || '');
+  const order = [['경호', 'grd'], ['소독', 'san'], ['방역', 'san'], ['미화', 'cln'], ['주차', 'prk'], ['시설', 'fac'], ['안내', 'info'], ['특수', 'spc'], ['조리', 'off'], ['사무', 'off'], ['보안', 'sec'], ['경비', 'sec']];
+  const L = p.items[0].L.c, M = p.items[0].M.c;
+  const byCat = L === 'E' ? 'cln' : M === 'F1' ? 'prk' : M === 'F2' ? 'fac' : (['A', 'B', 'C', 'D'].includes(L) ? 'sec' : null);
+  const found = order.filter(([w]) => t.includes(w)).map(x => x[1]);
+  if (byCat && found.includes(byCat)) return byCat;
+  return found[0] || byCat || 'off';
+}
+function figName(kind, key) { const alt = { grd: 'sec', spc: 'fac', san: 'fac' }; return ASSET.fig[kind + '_' + key] ? kind + '_' + key : kind + '_' + (alt[key] || 'sec'); }
+function figBox(name, x, y, maxW, maxH, align) {
+  const d = ASSET.figDim[name] || [600, 760]; const r = Math.min(maxW / d[0], maxH / d[1]); const w = d[0] * r, h = d[1] * r;
+  return Im(align === 'left' ? x : x + (maxW - w) / 2, y + (maxH - h) / 2, w, h, ASSET.fig[name]);
+}
+const Vd = (x, y, w, h, key) => ({ t: 'video', x, y, w, h, key, src: ASSET.poster[key] });
+async function fetchVideo(k) {
+  for (const u of ['media/videos/' + k + '.mp4', APP.shareUrl + 'media/videos/' + k + '.mp4']) {
+    try { const r = await fetch(u); if (r.ok) { const b = await r.blob(); if (b.size > 10000) return await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1]); fr.readAsDataURL(b); }); } } catch (e) { }
+  }
+  return null;
+}
+async function toPng(u) { const im = await loadImg(u); const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); return c.toDataURL('image/png'); }
+/* 현장 재교육 영상 슬라이드 (공통) */
+function videoSlide(p, no, title, sub, foot, points, key) {
+  const v = VIDEO_OF[key] || 'sec1', o = frame(title, sub, no, p, foot);
+  o.push(Rc(0.6, 1.62, 7.5, 4.3, '0F1530'));
+  o.push(Vd(0.65, 1.67, 7.4, 4.2, v));
+  o.push(T(0.6, 6.0, 7.5, 0.35, `▶ ${VIDEO_TITLE[v] || '현장 근무 영상'} — PPT 파일에서 바로 재생됩니다 (PDF는 대표 장면)`, { pt: 10.5, color: K.mute }));
+  o.push(Rc(8.35, 1.62, 4.4, 4.75, 'FAFBFC', { line: K.line })); o.push(Rc(8.35, 1.62, 4.4, 0.06, C.green));
+  o.push(figBox(figName('cute', key), 8.5, 1.8, 1.35, 1.75));
+  o.push(T(9.95, 1.85, 2.7, 1.6, [{ text: '현장 재교육', bold: true, color: C.greenD }, { text: `${JOB_NAME[key] || ''} 근무 기준`, size: 0.85, color: K.ink, bold: true }, { text: '교육 후 전 근무자 서명 · 사진 기록', size: 0.75, color: K.mute }], { max: 15, min: 9, gap: 3 }));
+  o.push(Rc(8.6, 3.62, 3.9, 0.012, K.line));
+  o.push(T(8.6, 3.72, 3.95, 2.55, points.slice(0, 5).map(t => ({ text: '•  ' + t })), { max: 12, min: 8.5 }));
+  return o;
+}
 function frame(title, sub, no, p, foot) {
   const E = [];
   E.push(Rc(0, 0, SW, SH, C.white));
@@ -455,7 +511,7 @@ function coverSlide(o) {
   c.push(Rc(0, 0, SW, SH, C.white));
   c.push(Rc(7.75, 0, SW - 7.75, SH, 'F3F5F8'));
   c.push(Rc(7.75, 0, 0.04, SH, K.line));
-  c.push(Im(8.45, 0.95, 4.2, 4.2 * (o.ratio || 1046 / 1024), o.img || ASSET.cube));
+  if (o.fig) c.push(figBox(o.fig, 8.1, 0.55, 4.95, 5.55)); else c.push(Im(8.45, 0.95, 4.2, 4.2 * (o.ratio || 1046 / 1024), o.img || ASSET.cube));
   c.push(Rc(0, 0, 0.12, SH, K.ink)); c.push(Rc(0.12, 0, 0.05, SH, C.green));
   c.push(Im(0.85, 0.75, 2.1, 2.1 * 340 / 900, ASSET.logo));
   c.push(Rc(0.85, 2.55, 0.5, 0.05, C.green));
@@ -474,11 +530,12 @@ function closingSlide(o) {
   e.push(Rc(0, 0, SW, SH, C.white));
   e.push(Rc(0, SH - 1.15, SW, 1.15, 'F3F5F8'));
   e.push(Rc(0, 0, 0.12, SH, K.ink)); e.push(Rc(0.12, 0, 0.05, SH, C.green));
-  e.push(Im(SW / 2 - 1.9, 1.35, 3.8, 3.8 * 340 / 900, ASSET.logo));
-  e.push(T(1, 3.0, SW - 2, 0.7, [{ text: 'The Best Choice, S-Tec', bold: true }], { pt: 30, color: K.ink, align: 'center' }));
-  e.push(T(1, 3.72, SW - 2, 0.45, o.tag, { pt: 14, color: K.mute, align: 'center' }));
-  e.push(Rc(SW / 2 - 0.6, 4.35, 1.2, 0.04, C.green));
-  e.push(T(1, 4.5, SW - 2, 0.4, o.org, { pt: 11.5, color: K.mute, align: 'center' }));
+  e.push(Im(0.75, 0.55, 1.75, 1.75 * 340 / 900, ASSET.logo));
+  e.push(figBox(o.fig || 'team', SW / 2 - 2.6, 0.75, 5.2, 3.3));
+  e.push(T(1, 4.15, SW - 2, 0.6, [{ text: 'The Best Choice, S-Tec', bold: true }], { pt: 28, color: K.ink, align: 'center' }));
+  e.push(T(1, 4.75, SW - 2, 0.42, o.tag, { pt: 13.5, color: K.mute, align: 'center' }));
+  e.push(Rc(SW / 2 - 0.6, 5.3, 1.2, 0.04, C.green));
+  e.push(T(1, 5.4, SW - 2, 0.36, o.org, { pt: 11, color: K.mute, align: 'center' }));
   e.push(Im(0.85, SH - 0.88, 1.5, 1.5 * 53 / 127, ASSET.sanitec));
   e.push(sigEl(SW - 4.25, SH - 0.7, 0.4));
   return e;
@@ -506,7 +563,7 @@ function buildSlides(p) {
   /* 1. 표지 */
   S.push(coverSlide({ eyebrow: `${APP.org}  ·  ${isClient ? '고객사 제출용' : '내부 보고용'}`, title: docTitle(p),
     lines: [`${f.client}${f.site ? ' · ' + f.site : ''}`, p.names.join(' / ')], meta: `${fmtD(p.made)}   |   ${f.dept}${f.author ? ' ' + f.author : ''}   |   ${p.docNo}`,
-    badge: `심각도 ${SEV[p.sev].label}`, badgeColor: SEV[p.sev].color })); no++;
+    badge: `심각도 ${SEV[p.sev].label}`, badgeColor: SEV[p.sev].color, fig: figName('dio', jobKey(p)) })); no++;
 
   /* 2. 목차 */
   const toc = [p.site ? 'Complaint 접수 개요 · 발생 사업장' : 'Complaint 접수 개요', '제기 내용 및 사실관계', '원인 분석 (4M)', '대응 방안 로드맵', '법적 검토'].concat(isClient ? [] : ['근무자 조치 기준']).concat(['실행 일정 및 사후관리', '고객사 약속사항']);
@@ -565,7 +622,8 @@ function buildSlides(p) {
     o.push(Rc(8.05, 1.7, 4.7, 4.72, 'FAFBFC', { line: K.line }));
     o.push(T(8.3, 1.8, 4.2, 0.4, [{ text: '계약 인원 구성', bold: true }], { pt: 15, color: C.navy }));
     o.push(T(8.3, 2.2, 2.2, 0.9, [{ text: String(st.total || 0), bold: true }], { pt: 46, color: C.navy }));
-    o.push(T(9.75, 2.55, 2.6, 0.45, '명 (총원)', { pt: 14, color: C.gray }));
+    o.push(T(9.75, 2.55, 1.3, 0.45, '명 (총원)', { pt: 14, color: C.gray }));
+    o.push(figBox(figName('cute', jobKey(p)), 11.05, 1.75, 1.6, 1.7));
     const bar = (y, label, val, tot, col) => {
       o.push(T(8.3, y, 1.0, 0.36, label, { pt: 12, bold: true, valign: 'middle' }));
       o.push(Rc(9.3, y + 0.06, 2.75, 0.24, 'E1E5EC'));
@@ -630,6 +688,10 @@ function buildSlides(p) {
     });
   }
 
+  /* 6-1. 현장 재교육 영상 */
+  { const jk = jobKey(p); S.push(videoSlide(p, no, '04  현장 개선 실행 — 근무 기준 재교육', `${JOB_NAME[jk]} 근무 기준 · 현장 영상 교육 (D+1 ~ D+7)`, null,
+      uniq(parseGrp(p.short).flatMap(g => g.lines).concat(parseGrp(p.prev).flatMap(g => g.lines))), jk)); no++; }
+
   /* 7. 법적 검토 (표 분할) */
   const laws = p.lawIds.filter(id => p.lawOn[id]).map(id => LAWS[id]);
   const per = 5;
@@ -688,11 +750,17 @@ function buildSlides(p) {
   });
   o10.push(Rc(7.85, 1.7, 4.9, 4.72, K.tint, { line: K.line })); o10.push(Rc(7.85, 1.7, 0.07, 4.72, K.navy));
   o10.push(T(8.15, 1.82, 4.4, 0.45, [{ text: '회신 요지', bold: true }], { pt: 15, color: K.navy }));
-  o10.push(T(8.1, 2.3, 4.45, 4.0, lines(p.reply).slice(1).map(t => ({ text: t })), { max: 12.5, min: 8.5, color: '2A3150', lh: 1.32, gap: 5 }));
+  const mg = (typeof UI !== 'undefined' && UI.manager) || null, mph = mg && mg.photo ? mg.photo : (mg && /최민영/.test(mg.name) ? ASSET.fig.mgr : null);
+  o10.push(T(8.15, 2.3, 4.45, mg ? 2.85 : 4.0, lines(p.reply).slice(1).map(t => ({ text: t })), { max: 12.5, min: 8, color: '2A3150', lh: 1.3, gap: 4 }));
+  if (mg) {
+    o10.push(Rc(8.15, 5.3, 4.4, 0.012, K.line));
+    if (mph) o10.push(mph === ASSET.fig.mgr ? figBox('mgr', 8.15, 5.38, 0.95, 0.95) : Im(8.15, 5.38, 0.95, 0.95, mph));
+    o10.push(T(mph ? 9.25 : 8.15, 5.4, 3.3, 0.9, [{ text: '대응 책임자', size: 0.8, color: K.mute }, { text: `${mg.title || ''} ${mg.name}`.trim(), bold: true, color: K.ink }, { text: mg.org || f.dept, size: 0.8, color: K.mute }], { max: 14, min: 9, gap: 1 }));
+  }
   S.push(o10); no++;
 
   /* 11. 맺음 */
-  S.push(closingSlide({ tag: '고객의 목소리를 구조로 개선합니다 — 재발 없는 현장을 약속드립니다.', org: `${APP.org}  ·  ${f.dept}` }));
+  S.push(closingSlide({ fig: 'team', tag: '고객의 목소리를 구조로 개선합니다 — 재발 없는 현장을 약속드립니다.', org: `${APP.org}  ·  ${f.dept}` }));
   return S;
 }
 
@@ -701,10 +769,17 @@ async function makePptx(p, slidesIn, titleIn) {
   const pptx = new PptxGenJS();
   pptx.layout = 'LAYOUT_WIDE'; pptx.author = APP.maker; pptx.company = APP.org; pptx.title = titleIn || docTitle(p);
   const SHP = { rect: pptx.ShapeType.rect, para: pptx.ShapeType.parallelogram, chevron: pptx.ShapeType.chevron, homePlate: pptx.ShapeType.homePlate, ellipse: pptx.ShapeType.ellipse };
-  (slidesIn || buildSlides(p)).forEach(els => {
+  const slides = slidesIn || buildSlides(p);
+  const vids = {}, covers = {};
+  for (const el of slides.flat()) if (el.t === 'video' && !(el.key in vids)) { vids[el.key] = await fetchVideo(el.key); covers[el.key] = await toPng(el.src); }
+  slides.forEach(els => {
     const s = pptx.addSlide();
     els.forEach(e => {
       if (e.t === 'img') s.addImage({ data: e.src, x: e.x, y: e.y, w: e.w, h: e.h });
+      else if (e.t === 'video') {
+        if (vids[e.key]) s.addMedia({ type: 'video', data: 'video/mp4;base64,' + vids[e.key], cover: covers[e.key], x: e.x, y: e.y, w: e.w, h: e.h, extn: 'mp4' });
+        else { s.addImage({ data: e.src, x: e.x, y: e.y, w: e.w, h: e.h }); s.addText('영상은 웹 주소·앱에서 만들면 PPT에 함께 들어갑니다', { x: e.x, y: e.y + e.h - 0.45, w: e.w, h: 0.4, fontSize: 11, color: 'FFFFFF', fill: { color: '000000', transparency: 45 }, align: 'center', fontFace: '맑은 고딕' }); }
+      }
       else if (e.t === 'shape') s.addShape(SHP[e.k], { x: e.x, y: e.y, w: e.w, h: e.h, fill: { color: e.fill }, line: e.line ? { color: e.line, width: e.lw || 0.75 } : { type: 'none' } });
       else if (e.t === 'text') {
         const runs = e.paras.map((q, i) => ({ text: q.text, options: { bold: q.bold ?? e.bold, color: q.color || e.color, fontSize: +(e.pt * (q.size || 1)).toFixed(1), breakLine: i < e.paras.length - 1, paraSpaceAfter: i < e.paras.length - 1 ? (q.gap ?? e.gap) : 0 } }));
@@ -720,7 +795,8 @@ function slideDom(els) {
   const d = document.createElement('div'); d.className = 'slide';
   els.forEach(e => {
     const n = document.createElement('div'); n.style.cssText = `position:absolute;left:${e.x * DPI}px;top:${e.y * DPI}px;width:${e.w * DPI}px;height:${e.h * DPI}px;`;
-    if (e.t === 'img') { const im = document.createElement('img'); im.src = e.src; im.style.cssText = 'width:100%;height:100%;display:block'; n.appendChild(im); }
+    if (e.t === 'img' || e.t === 'video') { const im = document.createElement('img'); im.src = e.src; im.style.cssText = 'width:100%;height:100%;display:block;object-fit:cover'; n.appendChild(im);
+      if (e.t === 'video') { const pl = document.createElement('div'); pl.style.cssText = 'position:absolute;left:50%;top:50%;width:92px;height:92px;margin:-46px 0 0 -46px;border-radius:50%;background:rgba(15,21,48,.72);box-shadow:0 0 0 4px rgba(255,255,255,.85)'; pl.innerHTML = '<div style="position:absolute;left:36px;top:26px;width:0;height:0;border-left:30px solid #fff;border-top:20px solid transparent;border-bottom:20px solid transparent"></div>'; n.appendChild(pl); } }
     else if (e.t === 'shape') {
       n.style.background = '#' + e.fill; if (e.line) n.style.boxShadow = `inset 0 0 0 1px #${e.line}`;
       const o = Math.min(e.w, e.h) * DPI, W = e.w * DPI;

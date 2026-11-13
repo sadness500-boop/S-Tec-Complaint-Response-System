@@ -146,6 +146,7 @@ function renderSites() {
   document.querySelectorAll('#brChips button').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.br || '') === br)));
   const allow = (window.APP_ACCESS && APP_ACCESS.branches && APP_ACCESS.branches.length) ? APP_ACCESS.branches : null;   // 프로그램별 권한 · 관리 범위(지사)
   const list = SITES.filter(st => (!allow || allow.includes(st.br)) && (!br || st.br === br) && siteMatches(st, q));
+  state.siteList = list; if (typeof drawPins === 'function') drawPins();
   $('#siteCnt').textContent = `${list.length}곳 · ${list.reduce((a, s) => a + (s.total || 0), 0)}명`;
   $('#siteList').innerHTML = list.length ? list.map(st => `<li class="st ${state.site && state.site.id === st.id ? 'on' : ''}" data-id="${st.id}">
       <span class="brb b-${st.br}">${st.br}</span><span class="nm">${esc(st.name)}<small>${esc(st.addr)}</small></span>
@@ -196,5 +197,60 @@ function uiInit() {
   ['f_author', 'f_dept'].forEach(id => $('#' + id).addEventListener('input', e => e.target.dataset.touched = '1'));
   $('#mgrCard').onclick = openMgr; $('#qrCard').onclick = openQR; $('#refCard').onclick = openRef;
   document.querySelectorAll('[data-theme-set]').forEach(b => b.onclick = () => applyTheme(b.dataset.themeSet));
-  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate();
+  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap();
+}
+
+/* =====================================================================
+ * 사업장 위치 지도 — 카카오맵 (회사 공용 JavaScript 키 · 등록 도메인 sadness500-boop.github.io)
+ * 웹 주소·안드로이드 앱에서 표시, 그 밖(PC에 내려받은 HTML 등)에서는 「카카오맵에서 열기」 바로가기
+ * ===================================================================== */
+const KAKAO_KEY = '8453c0a68310133484b3b92ed0f0a1f7';
+const BR_COLOR = { 동부: '#1E8B3A', 서부: '#0B1F8F', 남부: '#C2410C', 중부: '#6D28D9' };
+const MAP = { ready: null, map: null, pins: [] };
+function mapCanLoad() { return (location.protocol === 'https:' && /(^|\.)sadness500-boop\.github\.io$/.test(location.hostname)) || !!window.Capacitor; }
+function loadKakao() {
+  if (MAP.ready) return MAP.ready;
+  MAP.ready = new Promise((res, rej) => {
+    if (window.kakao && kakao.maps) { kakao.maps.load(res); return; }
+    const s = document.createElement('script'); s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`;
+    s.onload = () => { try { kakao.maps.load(res); } catch (e) { rej(e); } }; s.onerror = rej; document.head.appendChild(s);
+    setTimeout(() => rej(new Error('timeout')), 10000);
+  });
+  return MAP.ready;
+}
+async function initMap() {
+  if (!mapCanLoad()) { mapFallback('지도는 웹 주소(sadness500-boop.github.io) 또는 안드로이드 앱에서 표시됩니다.'); return; }
+  try {
+    await loadKakao(); const k = kakao.maps, box = $('#siteMap'); box.classList.remove('nomap'); box.innerHTML = '';
+    MAP.map = new k.Map(box, { center: new k.LatLng(35.55, 128.95), level: 11 });
+    MAP.map.addControl(new k.ZoomControl(), k.ControlPosition.RIGHT);
+    drawPins();
+  } catch (e) { MAP.ready = null; mapFallback('카카오맵을 불러오지 못했습니다(인터넷 연결을 확인하세요).'); }
+}
+function mapFallback(msg) {
+  const box = $('#siteMap'); box.classList.add('nomap');
+  box.innerHTML = `<div class="nomap-in"><b>🗺 사업장 위치</b><span>${esc(msg)}</span><span id="mapLink"></span></div>`; updMapLink();
+}
+function updMapLink() {
+  const l = $('#mapLink'), st = state.site;
+  const html = st && st.lat ? `<a href="https://map.kakao.com/link/map/${encodeURIComponent(st.name)},${st.lat},${st.lng}" target="_blank" rel="noopener">📍 ${esc(st.name)} — 카카오맵에서 열기</a>` : '사업장을 고르면 카카오맵 바로가기가 나타납니다.';
+  if (l) l.innerHTML = html;
+  const cap = $('#mapCap'); if (cap) cap.innerHTML = st && st.lat ? `📍 <b>${esc(st.name)}</b> · ${esc(st.addr)} <a href="https://map.kakao.com/link/to/${encodeURIComponent(st.name)},${st.lat},${st.lng}" target="_blank" rel="noopener">길찾기</a>` : '지도의 점을 누르면 그 사업장이 선택됩니다.';
+}
+function drawPins() {
+  updMapLink();
+  if (!MAP.map) return;
+  const k = kakao.maps; MAP.pins.forEach(o => o.setMap(null)); MAP.pins = [];
+  const list = state.siteList || SITES, bounds = new k.LatLngBounds(); let n = 0;
+  list.forEach(st => {
+    if (!st.lat) return; const pos = new k.LatLng(st.lat, st.lng); bounds.extend(pos); n++;
+    const on = state.site && state.site.id === st.id;
+    const el = document.createElement('div'); el.className = 'kpin' + (on ? ' on' : ''); el.style.setProperty('--c', BR_COLOR[st.br] || '#333'); el.title = `${st.name} (${st.br}지사)`;
+    el.innerHTML = on ? `<i></i><span>${esc(st.name)}</span>` : '<i></i>';
+    el.addEventListener('click', () => selectSite(st, true));
+    const ov = new k.CustomOverlay({ position: pos, content: el, xAnchor: on ? 0.08 : 0.5, yAnchor: 0.5, zIndex: on ? 10 : 1, clickable: true }); ov.setMap(MAP.map); MAP.pins.push(ov);
+  });
+  MAP.map.relayout();
+  if (state.site && state.site.lat) { MAP.map.setLevel(6); MAP.map.panTo(new k.LatLng(state.site.lat, state.site.lng)); }
+  else if (n) MAP.map.setBounds(bounds, 30, 30, 30, 30);
 }

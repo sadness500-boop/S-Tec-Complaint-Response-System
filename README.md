@@ -2,7 +2,7 @@
 
 <img src="icons/icon-192.png" width="96" alt="S-Tec Complaint 아이콘">
 
-**에스텍 그룹 고객사 Complaint 대응 프로그램** · v1.2.0
+**에스텍 그룹 고객사 Complaint 대응 프로그램** · v1.3.0
 
 고객사가 제기한 Complaint를 **① 발생 사업장 선정 → ② 대·중·소 분류 → ③ 내용 작성 → ④ 출력** 순서로 처리하면,
 대응방안을 **Word(머리글·바닥글 서식) · PPT(16:9) · PDF(PPT와 같은 디자인)** 3종으로 바로 만들어 줍니다. 웹 버전과 안드로이드 앱(APK)으로 씁니다.
@@ -12,9 +12,9 @@
 | 구분 | 파일 | 주소 |
 |---|---|---|
 | 웹 버전 | [index.html](index.html) | https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/ |
-| 웹 버전 (버전별) | [releases/S-Tec-Complaint-Response-System_v1.2.0.html](releases/S-Tec-Complaint-Response-System_v1.2.0.html) | |
+| 웹 버전 (버전별) | [releases/S-Tec-Complaint-Response-System_v1.3.0.html](releases/S-Tec-Complaint-Response-System_v1.3.0.html) | |
 | 안드로이드 앱 (최신) | `stcr-latest.apk` | https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk |
-| 안드로이드 앱 (버전별) | `releases/S-Tec-Complaint-Response-System_v1.2.0.apk` | 릴리스 `v1.2.0` |
+| 안드로이드 앱 (버전별) | `releases/S-Tec-Complaint-Response-System_v1.3.0.apk` | 릴리스 `v1.3.0` |
 
 - **APK는 GitHub Actions가 만듭니다.** `index.html` 또는 `version.json`을 올리면 Actions 탭의 "Android APK"가 실행되어 약 5분 뒤 `releases/` 폴더와 릴리스에 버전 이름이 붙은 APK가 올라갑니다. Actions 탭 › Android APK › Run workflow 로 직접 실행할 수도 있습니다.
 - **안드로이드 설치:** APK 내려받기 → "출처를 알 수 없는 앱 설치 허용" → 설치. Play 프로텍트 경고가 뜨면 "무시하고 설치".
@@ -31,6 +31,13 @@
 5. **⑤ 근무자 조치 문서 (내부·대외비)** — Complaint를 초래한 당사 근무자에 대한 근무자 조치 계획서를 고객사 대응자료와 별도로 Word·PPT·PDF 3종 출력: 대상·발생 개요, 위반 사실·근거(3대 중대위반 표시), 징계 양정(징계 없음 → 구두 주의 → 서면 경고 → 감급 → 정직 → 해고 검토, 항목 기준 + 위반 이력으로 자동 권고), 조치 결정(안)·결재란, 진행 절차(D+0~D+30)·법적 유의사항, 재발방지 교육, 붙임 경위서·확인서(재발방지 서약) 양식.
 6. **출력 기록 관리** — 최근 출력 기록을 눌러 불러오기, 🗑 한 건 삭제 · 선택 삭제 · 전체 삭제(로그인 시 모든 기기에 함께 반영).
 7. **④ 대응방안 출력** — 주요 보고내용, 접수 개요, **발생 사업장 정보**, 4M 원인분석, 대응 방안(D+0 / D+1~7 / 재발방지), 법적 검토(56개 조항), 실행 일정(D+0~D+30), 고객사 회신(안). 화면에서 고친 내용이 그대로 출력됩니다.
+
+## 매뉴얼 (docs/)
+
+| 문서 | Word | PPT |
+|---|---|---|
+| 사용자 매뉴얼 | [docx](docs/S-Tec-Complaint-Response-System_사용자매뉴얼_v1.3.0.docx) | [pptx](docs/S-Tec-Complaint-Response-System_사용자매뉴얼_v1.3.0.pptx) |
+| 제작자 관리 사용매뉴얼 | [docx](docs/S-Tec-Complaint-Response-System_제작자관리매뉴얼_v1.3.0.docx) | [pptx](docs/S-Tec-Complaint-Response-System_제작자관리매뉴얼_v1.3.0.pptx) |
 
 ## 에스텍 통합 로그인 · 프로그램별 권한 (v1.2.0)
 
@@ -69,6 +76,7 @@ package.json · capacitor.config.json · android-keystore/   안드로이드 앱
 
 ## 변경 이력
 
+- **v1.3.0** (2026-11-14) — PC 설치 앱 아이콘 갱신(manifest id·아이콘 캐시 갱신), ① 사업장 목록 아래 카카오맵 위치(지사별 색 점·선택·길찾기), 고객사·근무자 PPT에 현장 피규어 사진·근무 영상(PPT 재생) 반영, Supabase 프로그램별 권한 SQL 적용, 사용자·제작자 매뉴얼(Word·PPT)
 - **v1.2.0** (2026-11-14) — 새 앱 아이콘(민원/불만처리 · 고객의 소리 VOC), ⑤ 근무자 조치 문서(Word·PPT·PDF) 별도 출력, 고객사 대응 PPT·PDF 디자인 개선(밝은 바탕·포인트 컬러), 출력 기록 삭제 관리(한 건·선택·전체), 통합 로그인 프로그램별 권한(🔐 탭, server/supabase_app_access.sql)
 - **v1.1.0** (2026-11-14) — 상단 기능(Complaint 담당·다운로드 QR·친구 추천·로그인·주간/야간/시스템) 반영, 에스텍베스트 사업장 151곳 목록 반영(① 사업장 선정 → ② 분류 → ③ 작성 → ④ 출력), Word·PPT·PDF에 발생 사업장 정보(사업장 현황 슬라이드) 기재, 안드로이드 앱(APK) 자동 빌드
 - **v1.0.0** (2026-11-14) — 최초 버전: Complaint 대·중·소 분류, 대응방안 Word·PPT·PDF 3종 출력

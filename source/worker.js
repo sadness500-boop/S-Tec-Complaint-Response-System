@@ -175,6 +175,7 @@ async function makeWorkerDocx(p, w) {
   // Ⅵ
   ch.push(H1('Ⅵ. 재발방지 교육 · 사후관리'));
   ch.push(...bullets([{ title: '', lines: uniq(p.items.flatMap(x => x.S.sh.slice(0, 1).concat(x.S.p.slice(0, 1)))).concat(['D+30까지 불시점검으로 이행 여부 확인, 재위반 시 한 단계 가중 조치']) }]));
+  { const v = VIDEO_OF[jobKey(p)]; ch.push(...imgPara(ASSET.poster[v], 3.4, `▶ 재교육 영상: ${VIDEO_TITLE[v]} (근무자 조치 PPT에서 재생)`, [16, 9])); }
   // 붙임 1 경위서
   const blank = n => Array.from({ length: n }, () => P([R(' ')], { after: 0, line: 360 }));
   ch.push(new docx.Paragraph({ children: [new docx.PageBreak()] }));
@@ -209,7 +210,7 @@ function buildWorkerSlides(p, w) {
   const f = p.f, L = DLV[w.level], R0 = DLV[w.rec], st = p.site, S = [];
   const foot = `${APP.org} · 근무자 조치 계획서 · 내부 문서(대외비)`;
   let no = 1;
-  S.push(coverSlide({ eyebrow: `${APP.org}  ·  내부 문서 · 대외비`, title: '근무자 조치 계획서', img: ASSET.voc, ratio: 1,
+  S.push(coverSlide({ eyebrow: `${APP.org}  ·  내부 문서 · 대외비`, title: '근무자 조치 계획서', fig: figName('cute', jobKey(p)),
     lines: [`${w.name}${w.role ? ' · ' + w.role : ''}  |  ${f.client}${st ? ' (' + st.br + '지사)' : ''}`, p.names.join(' / ')],
     meta: `${fmtD(kstNow())}   |   ${f.dept}${f.author ? ' ' + f.author : ''}   |   관련 ${p.docNo}`, badge: `결정(안) ${L.n}`, badgeColor: L.c })); no++;
 
@@ -295,6 +296,8 @@ function buildWorkerSlides(p, w) {
   g.push(T(7.75, 2.3, 4.8, 3.55, uniq(p.items.flatMap(x => x.S.sh.slice(0, 1).concat(x.S.p.slice(0, 1)))).concat(['D+30 불시점검 · 재위반 시 가중 조치']).slice(0, 7).map(t => ({ text: '•  ' + t })), { max: 12.5, min: 8.5 }));
   S.push(g); no++;
 
-  S.push(closingSlide({ tag: '공정한 절차와 명확한 기준으로 — 같은 일이 반복되지 않는 현장을 만듭니다.', org: `${APP.org}  ·  ${f.dept}  ·  내부 문서` }));
+  { const jk = jobKey(p); S.push(videoSlide(p, no, '07  재교육 — 현장 근무 기준 영상', `${w.name} 대상 재교육 · ${JOB_NAME[jk]} 근무 기준`, foot,
+      w.extras.concat(uniq(p.items.flatMap(x => x.S.sh))), jk)); no++; }
+  S.push(closingSlide({ fig: 'team_dio', tag: '공정한 절차와 명확한 기준으로 — 같은 일이 반복되지 않는 현장을 만듭니다.', org: `${APP.org}  ·  ${f.dept}  ·  내부 문서` }));
   return S;
 }
