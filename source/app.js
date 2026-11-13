@@ -1,12 +1,12 @@
 /* =====================================================================
- * S-Tec Complaint Response System v1.1.0 — 앱 로직
+ * S-Tec Complaint Response System v1.2.0 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.1.0',
+  version: 'v1.2.0',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
@@ -16,6 +16,7 @@ const APP = {
   org: '에스텍 그룹',
   branch: '에스텍베스트 동부지사'
 };
+const K = { ink: '18224F', navy: '22348F', mute: '6B7385', line: 'E3E7EE', tint: 'F4F6FB', tintG: 'EEF7F1', red: 'C8553D', grn: '2E8B57', grn2: '3A9D6A', blu: '2B4C9B', blu2: '1F3A73', amber: 'D98E04' };
 const C = { navy: '0B1F8F', navyD: '07124F', green: '1E8B3A', greenD: '17552F', brick: 'E34234', silver: 'C9CED6', silverL: 'EEF1F5', ink: '1C2333', gray: '5B6475', white: 'FFFFFF' };
 const MAX_PICK = 5;
 const state = { picked: [], plan: null, sigDataUrl: null, sigPx: 0, site: null };
@@ -326,8 +327,11 @@ async function makeDocx(p) {
   ch.push(P([R('- 끝 -', { size: 20, bold: true })], { align: docx.AlignmentType.CENTER, before: 200, after: 120 }));
   ch.push(P([R(`※ 법령 요약은 실무 참고용입니다. 적용 전 국가법령정보센터(law.go.kr) 원문 및 노무 자문으로 확인하십시오.  |  ${APP.name} ${APP.version}`, { size: 15, color: '8A93A3' })], { align: docx.AlignmentType.CENTER }));
 
+  return await packDocx(ch, docTitle(p));
+}
+async function packDocx(ch, title) {
   const doc = new docx.Document({
-    creator: APP.maker, title: docTitle(p), description: `${APP.name} ${APP.version}`,
+    creator: APP.maker, title, description: `${APP.name} ${APP.version}`,
     styles: { default: { document: { run: { font: W_FONT, size: 20 } } } },
     sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1850, bottom: 1831, left: 1134, right: 1134, header: 1020, footer: 973 } } }, children: ch }]
   });
@@ -427,22 +431,57 @@ function grads() {
 }
 
 /* 공통 프레임: 상단 제목바 + 하단 바 */
-function frame(title, sub, no, p) {
-  const g = grads(), E = [];
-  E.push(Im(0, 0, SW, SH, g.silverV));
-  // 상단: 스피드 스트라이프(로고 모티프)
-  [0, 1, 2].forEach(i => E.push(Rc(0.35 - i * 0.07, 0.36 + i * 0.17, 0.62 + i * 0.05, 0.12, C.green, { k: 'para' })));
-  E.push(T(1.15, 0.28, 9.2, 0.62, [{ text: title, bold: true }], { pt: 26, color: C.navy, valign: 'middle' }));
-  if (sub) E.push(T(1.15, 0.88, 9.6, 0.32, sub, { pt: 12, color: C.gray }));
-  E.push(Im(SW - 2.05, 0.3, 1.6, 1.6 * 340 / 900, ASSET.logo));
-  E.push(Im(0.35, 1.3, SW - 0.7, 0.05, g.green));
-  E.push(Im(0.35, 1.37, SW - 0.7, 0.018, g.fadeN));
-  // 하단
-  E.push(Rc(0, SH - 0.42, SW, 0.42, C.navyD));
-  E.push(Rc(0, SH - 0.45, SW, 0.03, C.green));
-  E.push(T(0.4, SH - 0.38, 7.5, 0.34, `${APP.org} · ${p.f.client} ${docTitle(p)}`, { pt: 10, color: 'C9D1F0', valign: 'middle' }));
-  E.push(T(SW - 1.4, SH - 0.38, 1.0, 0.34, String(no).padStart(2, '0'), { pt: 12, color: C.white, bold: true, align: 'right', valign: 'middle' }));
+function frame(title, sub, no, p, foot) {
+  const E = [];
+  E.push(Rc(0, 0, SW, SH, C.white));
+  E.push(Rc(0, 0, 0.12, SH, K.ink));                       // 좌측 얇은 세로 띠
+  E.push(Rc(0.12, 0, 0.05, SH, C.green));
+  [0, 1, 2].forEach(i => E.push(Rc(0.62 - i * 0.05, 0.42 + i * 0.13, 0.42 + i * 0.04, 0.08, i === 1 ? K.grn2 : C.green, { k: 'para' })));
+  E.push(T(1.3, 0.3, 9.4, 0.6, [{ text: title, bold: true }], { pt: 24, color: K.ink, valign: 'middle' }));
+  if (sub) E.push(T(1.3, 0.86, 9.6, 0.3, sub, { pt: 11.5, color: K.mute }));
+  E.push(Im(SW - 1.95, 0.36, 1.45, 1.45 * 340 / 900, ASSET.logo));
+  E.push(Rc(0.6, 1.3, 1.1, 0.04, C.green));
+  E.push(Rc(1.7, 1.315, SW - 2.2, 0.012, K.line));
+  // 하단: 가는 선 + 회색 문구 + 쪽번호
+  E.push(Rc(0.6, SH - 0.48, SW - 1.1, 0.012, K.line));
+  E.push(T(0.6, SH - 0.44, 8.5, 0.32, foot || `${APP.org} · ${p.f.client} ${docTitle(p)}`, { pt: 9.5, color: '8A93A3', valign: 'middle' }));
+  E.push(Rc(SW - 0.95, SH - 0.36, 0.1, 0.1, C.green));
+  E.push(T(SW - 0.82, SH - 0.44, 0.4, 0.32, String(no).padStart(2, '0'), { pt: 11, color: K.ink, bold: true, valign: 'middle' }));
   return E;
+}
+/* 세련된 표지(공통) */
+function coverSlide(o) {
+  const c = [];
+  c.push(Rc(0, 0, SW, SH, C.white));
+  c.push(Rc(7.75, 0, SW - 7.75, SH, 'F3F5F8'));
+  c.push(Rc(7.75, 0, 0.04, SH, K.line));
+  c.push(Im(8.45, 0.95, 4.2, 4.2 * (o.ratio || 1046 / 1024), o.img || ASSET.cube));
+  c.push(Rc(0, 0, 0.12, SH, K.ink)); c.push(Rc(0.12, 0, 0.05, SH, C.green));
+  c.push(Im(0.85, 0.75, 2.1, 2.1 * 340 / 900, ASSET.logo));
+  c.push(Rc(0.85, 2.55, 0.5, 0.05, C.green));
+  c.push(T(0.85, 2.7, 6.6, 0.4, o.eyebrow, { pt: 13, color: C.green, bold: true }));
+  c.push(T(0.85, 3.1, 6.7, 1.25, [{ text: o.title, bold: true }], { max: 36, min: 24, color: K.ink, lh: 1.15 }));
+  c.push(T(0.85, 4.45, 6.6, 0.95, o.lines.map((t, i) => ({ text: t, size: i ? 0.8 : 1, color: i ? K.mute : '3A4366', bold: !i })), { max: 17, min: 10.5, gap: 4 }));
+  c.push(Rc(0.85, 5.65, 6.4, 0.012, K.line));
+  c.push(T(0.85, 5.75, 6.6, 0.4, o.meta, { pt: 10.5, color: K.mute }));
+  if (o.badge) { c.push(Rc(0.85, 6.3, 1.7, 0.36, o.badgeColor || K.ink, { k: 'para' })); c.push(T(0.85, 6.3, 1.7, 0.36, o.badge, { pt: 10.5, bold: true, color: C.white, align: 'center', valign: 'middle' })); }
+  c.push(sigEl(SW - 4.25, SH - 0.62, 0.4));
+  return c;
+}
+/* 맺음(공통) */
+function closingSlide(o) {
+  const e = [];
+  e.push(Rc(0, 0, SW, SH, C.white));
+  e.push(Rc(0, SH - 1.15, SW, 1.15, 'F3F5F8'));
+  e.push(Rc(0, 0, 0.12, SH, K.ink)); e.push(Rc(0.12, 0, 0.05, SH, C.green));
+  e.push(Im(SW / 2 - 1.9, 1.35, 3.8, 3.8 * 340 / 900, ASSET.logo));
+  e.push(T(1, 3.0, SW - 2, 0.7, [{ text: 'The Best Choice, S-Tec', bold: true }], { pt: 30, color: K.ink, align: 'center' }));
+  e.push(T(1, 3.72, SW - 2, 0.45, o.tag, { pt: 14, color: K.mute, align: 'center' }));
+  e.push(Rc(SW / 2 - 0.6, 4.35, 1.2, 0.04, C.green));
+  e.push(T(1, 4.5, SW - 2, 0.4, o.org, { pt: 11.5, color: K.mute, align: 'center' }));
+  e.push(Im(0.85, SH - 0.88, 1.5, 1.5 * 53 / 127, ASSET.sanitec));
+  e.push(sigEl(SW - 4.25, SH - 0.7, 0.4));
+  return e;
 }
 function sigEl(x, y, h) { return Im(x, y, h * state.sigPx / 210, h, state.sigDataUrl); }
 function listParas(groups, o = {}) {
@@ -465,19 +504,9 @@ function buildSlides(p) {
   const f = p.f, isClient = f.mode === 'client', S = [], g = grads();
   let no = 1;
   /* 1. 표지 */
-  const c = [];
-  c.push(Im(0, 0, SW, SH, g.navy));
-  c.push(Rc(7.9, 0, SW - 7.9 + 2.2, SH, 'F2F4F7', { k: 'para' }));
-  c.push(Im(8.55, 0.9, 4.3, 4.3 * 1046 / 1024, ASSET.cube));
-  [0, 1, 2, 3].forEach(i => c.push(Rc(-0.3, 1.0 + i * 0.27, 2.2 - i * 0.35, 0.17, i % 2 ? '2BA24A' : C.green, { k: 'para' })));
-  c.push(Im(0.6, 2.25, 3.0, 3.0 * 340 / 900, ASSET.logo));
-  c.push(T(0.6, 3.55, 7.2, 0.45, `${APP.org}  ·  ${isClient ? '고객사 제출용' : '내부 보고용'}`, { pt: 15, color: '9FE3B0', bold: true }));
-  c.push(T(0.6, 4.0, 7.4, 1.0, [{ text: docTitle(p), bold: true }], { max: 38, min: 26, color: C.white }));
-  c.push(T(0.6, 5.0, 7.0, 0.8, [{ text: `${f.client}${f.site ? ' · ' + f.site : ''}` }, { text: p.names.join(' / '), size: 0.8 }], { max: 18, min: 11, color: 'D7DDF5' }));
-  c.push(Rc(0.6, 5.95, 3.6, 0.03, C.green));
-  c.push(T(0.6, 6.05, 7.0, 0.5, `${fmtD(p.made)}  |  ${f.dept}${f.author ? ' ' + f.author : ''}  |  ${p.docNo}`, { pt: 11, color: 'AEB8E6' }));
-  c.push(sigEl(SW - 4.3, SH - 0.62, 0.42));
-  S.push(c); no++;
+  S.push(coverSlide({ eyebrow: `${APP.org}  ·  ${isClient ? '고객사 제출용' : '내부 보고용'}`, title: docTitle(p),
+    lines: [`${f.client}${f.site ? ' · ' + f.site : ''}`, p.names.join(' / ')], meta: `${fmtD(p.made)}   |   ${f.dept}${f.author ? ' ' + f.author : ''}   |   ${p.docNo}`,
+    badge: `심각도 ${SEV[p.sev].label}`, badgeColor: SEV[p.sev].color })); no++;
 
   /* 2. 목차 */
   const toc = [p.site ? 'Complaint 접수 개요 · 발생 사업장' : 'Complaint 접수 개요', '제기 내용 및 사실관계', '원인 분석 (4M)', '대응 방안 로드맵', '법적 검토'].concat(isClient ? [] : ['근무자 조치 기준']).concat(['실행 일정 및 사후관리', '고객사 약속사항']);
@@ -485,8 +514,8 @@ function buildSlides(p) {
   const colN = Math.ceil(toc.length / 2);
   toc.forEach((t, i) => {
     const col = i < colN ? 0 : 1, row = col ? i - colN : i, x = 1.2 + col * 5.9, y = 1.95 + row * 1.12;
-    t2.push(Rc(x, y, 0.95, 0.72, i % 2 ? C.navy : C.green, { k: 'para' }));
-    t2.push(T(x, y, 0.95, 0.72, String(i + 1).padStart(2, '0'), { pt: 22, bold: true, color: C.white, align: 'center', valign: 'middle' }));
+    t2.push(Rc(x, y, 0.95, 0.72, i % 2 ? K.tint : K.tintG, { k: 'para' }));
+    t2.push(T(x, y, 0.95, 0.72, String(i + 1).padStart(2, '0'), { pt: 22, bold: true, color: i % 2 ? K.navy : C.green, align: 'center', valign: 'middle' }));
     t2.push(T(x + 1.15, y, 4.4, 0.72, [{ text: t, bold: true }], { pt: 19, color: C.ink, valign: 'middle' }));
     t2.push(Rc(x + 1.15, y + 0.74, 4.3, 0.015, C.silver));
   });
@@ -497,12 +526,12 @@ function buildSlides(p) {
   const kv = [['고객사', f.client], ['발생 장소', f.site || '-'], ['업종', f.job || '-'], ['접수일', fmtD(p.d0)], ['발생 일시', f.occur || '-'], ['접수 경로', f.channel || '-'], ['제기자', f.raiser || '-'], ['관련 근무자', f.workers || '-']];
   kv.forEach((r, i) => {
     const y = 1.7 + i * 0.6;
-    o3.push(Rc(0.6, y, 1.7, 0.52, C.navy));
-    o3.push(T(0.6, y, 1.7, 0.52, r[0], { pt: 13, bold: true, color: C.white, align: 'center', valign: 'middle' }));
-    o3.push(Rc(2.3, y, 4.4, 0.52, C.white, { line: 'D5DAE1' }));
+    o3.push(Rc(0.6, y, 1.7, 0.52, K.tint));
+    o3.push(T(0.6, y, 1.7, 0.52, r[0], { pt: 12.5, bold: true, color: K.navy, align: 'center', valign: 'middle' }));
+    o3.push(Rc(2.3, y, 4.4, 0.52, C.white, { line: K.line }));
     o3.push(T(2.45, y, 4.15, 0.52, r[1], { max: 13, min: 9, valign: 'middle' }));
   });
-  o3.push(Rc(7.1, 1.7, 5.65, 4.72, C.white, { line: 'D5DAE1' }));
+  o3.push(Rc(7.1, 1.7, 5.65, 4.72, 'FAFBFC', { line: K.line }));
   o3.push(Rc(7.1, 1.7, 5.65, 0.08, C.green));
   o3.push(T(7.35, 1.9, 3.2, 0.4, [{ text: '심각도', bold: true }], { pt: 14, color: C.gray }));
   o3.push(Rc(10.35, 1.88, 2.15, 0.62, SEV[p.sev].color, { k: 'para' }));
@@ -519,11 +548,11 @@ function buildSlides(p) {
   /* 3-1. 발생 사업장 현황 (사업장 목록 기준) */
   if (p.site) {
     const st = p.site, o = frame('01  발생 사업장 현황', `에스텍베스트 사업장 목록 기준 · ${st.br}지사 관할`, no, p);
-    o.push(Rc(0.6, 1.7, 7.2, 4.72, C.white, { line: 'D5DAE1' }));
-    o.push(Rc(0.6, 1.7, 7.2, 1.05, C.navy));
+    o.push(Rc(0.6, 1.7, 7.2, 4.72, C.white, { line: K.line }));
+    o.push(Rc(0.6, 1.7, 7.2, 1.05, K.tint)); o.push(Rc(0.6, 1.7, 0.07, 1.05, C.green));
     o.push(Rc(0.85, 1.88, 1.25, 0.42, C.green, { k: 'para' }));
     o.push(T(0.85, 1.88, 1.25, 0.42, st.br + '지사', { pt: 12.5, bold: true, color: C.white, align: 'center', valign: 'middle' }));
-    o.push(T(2.25, 1.78, 5.4, 0.9, [{ text: st.name, bold: true }], { max: 24, min: 14, color: C.white, valign: 'middle' }));
+    o.push(T(2.25, 1.78, 5.4, 0.9, [{ text: st.name, bold: true }], { max: 24, min: 14, color: K.ink, valign: 'middle' }));
     const kv2 = [['주소', st.addr || '-'], ['계약일', st.since || '-'], ['사업장 유형', st.type || '-'], ['계약 업종', st.work || '-'], ['근무형태', st.shift || '-'],
       ['현장 책임자', ([st.pos, st.mgr].filter(Boolean).join(' ') || '-') + (st.mtel ? `  ${st.mtel}` : '')], ['사업장 전화', st.stel || '-']];
     kv2.forEach((r, i) => {
@@ -533,7 +562,7 @@ function buildSlides(p) {
       if (i < kv2.length - 1) o.push(Rc(0.85, y + 0.46, 6.75, 0.012, 'E3E7ED'));
     });
     // 인원 구성
-    o.push(Rc(8.05, 1.7, 4.7, 4.72, 'F4F6FA', { line: 'D5DAE1' }));
+    o.push(Rc(8.05, 1.7, 4.7, 4.72, 'FAFBFC', { line: K.line }));
     o.push(T(8.3, 1.8, 4.2, 0.4, [{ text: '계약 인원 구성', bold: true }], { pt: 15, color: C.navy }));
     o.push(T(8.3, 2.2, 2.2, 0.9, [{ text: String(st.total || 0), bold: true }], { pt: 46, color: C.navy }));
     o.push(T(9.75, 2.55, 2.6, 0.45, '명 (총원)', { pt: 14, color: C.gray }));
@@ -545,17 +574,17 @@ function buildSlides(p) {
     };
     const T0 = Math.max(1, st.total || 0);
     o.push(T(8.3, 3.25, 4, 0.3, '성별', { pt: 11, color: C.gray }));
-    bar(3.55, '남', st.m || 0, T0, '2E4BC6'); bar(3.95, '여', st.f || 0, T0, 'C2185B');
+    bar(3.55, '남', st.m || 0, T0, '5B7BD5'); bar(3.95, '여', st.f || 0, T0, 'C46A8E');
     o.push(T(8.3, 4.45, 4, 0.3, '업종별', { pt: 11, color: C.gray }));
-    bar(4.75, '보안', st.sec || 0, T0, C.navy); bar(5.15, '미화', st.cln || 0, T0, C.green); bar(5.55, '기타', st.etc || 0, T0, 'EF6C00');
+    bar(4.75, '보안', st.sec || 0, T0, K.blu); bar(5.15, '미화', st.cln || 0, T0, K.grn); bar(5.55, '기타', st.etc || 0, T0, K.amber);
     if (st.note) o.push(T(8.3, 5.95, 4.3, 0.42, '비고: ' + st.note, { max: 11, min: 8.5, color: C.gray }));
     S.push(o); no++;
   }
 
   /* 4. 내용·사실관계 */
   const o4 = frame('02  제기 내용 및 사실관계', '고객사 원문 요지와 확인 사항', no, p);
-  o4.push(Rc(0.6, 1.7, 6.0, 4.75, 'F4F6FA', { line: 'C7CEDA' }));
-  o4.push(Rc(0.6, 1.7, 0.1, 4.75, C.navy));
+  o4.push(Rc(0.6, 1.7, 6.0, 4.75, K.tint, { line: K.line }));
+  o4.push(Rc(0.6, 1.7, 0.07, 4.75, K.navy));
   o4.push(T(0.9, 1.78, 3, 0.7, [{ text: '“', bold: true }], { pt: 44, color: C.green }));
   o4.push(T(0.9, 2.4, 5.5, 3.95, lines(f.content).map(t => ({ text: t })), { max: 16, min: 9, lh: 1.35, gap: 6 }));
   const rightP = (f.demand ? [{ text: '고객사 요구사항', bold: true, color: C.green }].concat(lines(f.demand).map(t => ({ text: '•  ' + t }))).concat([{ text: ' ', size: 0.5 }]) : [])
@@ -565,18 +594,18 @@ function buildSlides(p) {
 
   /* 5. 원인 4M */
   const o5 = frame('03  원인 분석 (4M)', '개인 과실 이전에 구조적 공백을 먼저 본다', no, p);
-  const cg = parseGrp(p.cause), cols = [C.navy, C.green, '2E4BC6', C.greenD];
+  const cg = parseGrp(p.cause), cols = [K.blu, K.grn, '5B7BD5', K.blu2];
   cg.slice(0, 4).forEach((gx, i) => {
     const x = 0.6 + (i % 2) * 6.15, y = 1.7 + Math.floor(i / 2) * 2.4;
-    o5.push(Rc(x, y, 5.95, 2.25, C.white, { line: 'D5DAE1' }));
-    o5.push(Rc(x, y, 5.95, 0.5, cols[i]));
-    o5.push(T(x + 0.2, y, 5.6, 0.5, [{ text: gx.title, bold: true }], { pt: 15, color: C.white, valign: 'middle' }));
+    o5.push(Rc(x, y, 5.95, 2.25, C.white, { line: K.line }));
+    o5.push(Rc(x, y, 5.95, 0.06, cols[i]));
+    o5.push(T(x + 0.25, y + 0.1, 5.5, 0.45, [{ text: gx.title, bold: true }], { pt: 14.5, color: cols[i], valign: 'middle' }));
     o5.push(T(x + 0.25, y + 0.62, 5.5, 1.55, gx.lines.map(l => ({ text: '•  ' + l })), { max: 14, min: 9 }));
   });
   S.push(o5); no++;
 
   /* 6. 대응 로드맵 — 3단 → 넘치면 단계별 분할 */
-  const phases = [['즉시 조치', 'D+0', p.imm, C.brick], ['단기 개선', 'D+1 ~ D+7', p.short, C.green], ['재발방지 대책', '구조 개선', p.prev, C.navy]];
+  const phases = [['즉시 조치', 'D+0', p.imm, K.red], ['단기 개선', 'D+1 ~ D+7', p.short, K.grn], ['재발방지 대책', '구조 개선', p.prev, K.blu]];
   const colW = 3.95, colH = 4.05;
   const fitsAll = phases.every(ph => fit(listParas(parseGrp(ph[2]), { hcolor: ph[3] }), colW - 0.35, colH - 0.2, 13, 11).ok);
   if (fitsAll) {
@@ -585,7 +614,7 @@ function buildSlides(p) {
       const x = 0.6 + i * 4.1;
       o6.push(Rc(x, 1.7, colW, 0.72, ph[3], { k: 'homePlate' }));
       o6.push(T(x + 0.2, 1.7, colW - 0.6, 0.72, [{ text: ph[0], bold: true }, { text: ph[1], size: 0.75 }], { pt: 17, color: C.white, valign: 'middle', gap: 0 }));
-      o6.push(Rc(x, 2.5, colW, colH, C.white, { line: 'D5DAE1' }));
+      o6.push(Rc(x, 2.5, colW, colH, 'FAFBFC', { line: K.line }));
       o6.push(T(x + 0.18, 2.62, colW - 0.35, colH - 0.2, listParas(parseGrp(ph[2]), { hcolor: ph[3] }), { max: 13, min: 10 }));
     });
     S.push(o6); no++;
@@ -607,13 +636,13 @@ function buildSlides(p) {
   for (let k = 0; k < Math.max(1, Math.ceil(laws.length / per)); k++) {
     const chunk = laws.slice(k * per, k * per + per);
     const o = frame(`05  법적 검토${laws.length > per ? ` (${k + 1}/${Math.ceil(laws.length / per)})` : ''}`, '관련 법령과 적용 포인트 — 적용 전 원문 확인', no, p);
-    o.push(Rc(0.6, 1.65, 12.15, 0.48, C.navy));
-    o.push(T(0.75, 1.65, 3.3, 0.48, [{ text: '법령 · 조항', bold: true }], { pt: 13, color: C.white, valign: 'middle' }));
-    o.push(T(4.25, 1.65, 8.3, 0.48, [{ text: '주요 내용 및 적용', bold: true }], { pt: 13, color: C.white, valign: 'middle' }));
+    o.push(Rc(0.6, 1.65, 12.15, 0.48, K.tint)); o.push(Rc(0.6, 2.11, 12.15, 0.025, K.navy));
+    o.push(T(0.75, 1.65, 3.3, 0.48, [{ text: '법령 · 조항', bold: true }], { pt: 12.5, color: K.navy, valign: 'middle' }));
+    o.push(T(4.25, 1.65, 8.3, 0.48, [{ text: '주요 내용 및 적용', bold: true }], { pt: 12.5, color: K.navy, valign: 'middle' }));
     const rh = 4.2 / per;
     chunk.forEach((x, i) => {
       const y = 2.18 + i * rh;
-      o.push(Rc(0.6, y, 12.15, rh - 0.05, i % 2 ? 'F4F6FA' : C.white, { line: 'E0E4EA' }));
+      o.push(Rc(0.6, y, 12.15, rh - 0.05, i % 2 ? 'FAFBFC' : C.white, { line: K.line }));
       o.push(Rc(0.6, y, 0.08, rh - 0.05, C.green));
       o.push(T(0.8, y + 0.05, 3.3, rh - 0.15, [{ text: x.law, bold: true, color: C.navy }, { text: `${x.art} ${x.title}`, size: 0.85, color: C.gray }], { max: 13, min: 9, gap: 1, valign: 'middle' }));
       o.push(T(4.25, y + 0.05, 8.35, rh - 0.15, x.sum, { max: 12.5, min: 9, valign: 'middle' }));
@@ -632,18 +661,18 @@ function buildSlides(p) {
 
   /* 9. 실행 일정 */
   const o9 = frame(`${isClient ? '06' : '07'}  실행 일정 및 사후관리`, `접수일 ${fmtD(p.d0)} 기준`, no, p);
-  const tcol = [C.brick, C.green, C.green, C.navy, C.greenD];
-  o9.push(Rc(0.8, 2.48, 11.8, 0.06, C.silver));
+  const tcol = [K.red, K.grn, K.grn2, K.blu, K.blu2];
+  o9.push(Rc(0.8, 2.48, 11.8, 0.03, K.line));
   p.timeline.forEach((t, i) => {
     const x = 0.6 + i * 2.45;
     o9.push(Rc(x, 1.75, 2.35, 0.7, tcol[i], { k: 'chevron' }));
     o9.push(T(x + 0.25, 1.75, 1.85, 0.7, [{ text: t.d, bold: true }], { pt: 17, color: C.white, align: 'center', valign: 'middle' }));
     o9.push(Rc(x + 1.05, 2.38, 0.24, 0.24, tcol[i], { k: 'ellipse' }));
     o9.push(T(x, 2.7, 2.35, 0.35, t.date, { pt: 11.5, bold: true, color: C.navy, align: 'center' }));
-    o9.push(Rc(x + 0.05, 3.08, 2.25, 1.6, C.white, { line: 'D5DAE1' }));
+    o9.push(Rc(x + 0.05, 3.08, 2.25, 1.6, 'FAFBFC', { line: K.line }));
     o9.push(T(x + 0.18, 3.15, 2.0, 1.48, [{ text: t.t, bold: true, color: tcol[i] }, { text: t.a, size: 0.88 }], { max: 13, min: 9, gap: 3 }));
   });
-  o9.push(Rc(0.6, 4.88, 12.15, 1.55, 'F2F7F3', { line: 'BFDCC6' }));
+  o9.push(Rc(0.6, 4.88, 12.15, 1.55, K.tintG, { line: 'CFE6D7' }));
   o9.push(T(0.85, 4.95, 11.7, 1.42, [{ text: '사후관리 (D+30)', bold: true, color: C.greenD }].concat(listParas(parseGrp(p.follow))), { max: 13, min: 9 }));
   S.push(o9); no++;
 
@@ -652,39 +681,27 @@ function buildSlides(p) {
   const cm = parseGrp(p.commits).flatMap(gx => gx.lines).slice(0, 6);
   cm.forEach((t, i) => {
     const x = 0.6 + (i % 2) * 3.55, y = 1.7 + Math.floor(i / 2) * 1.55;
-    o10.push(Rc(x, y, 3.4, 1.42, C.white, { line: 'D5DAE1' }));
-    o10.push(Rc(x, y, 3.4, 0.07, i % 2 ? C.navy : C.green));
-    o10.push(T(x + 0.15, y + 0.15, 0.7, 0.5, String(i + 1).padStart(2, '0'), { pt: 20, bold: true, color: i % 2 ? C.navy : C.green }));
+    o10.push(Rc(x, y, 3.4, 1.42, C.white, { line: K.line }));
+    o10.push(Rc(x, y, 3.4, 0.05, i % 2 ? K.blu : C.green));
+    o10.push(T(x + 0.15, y + 0.15, 0.7, 0.5, String(i + 1).padStart(2, '0'), { pt: 20, bold: true, color: i % 2 ? K.blu : C.green }));
     o10.push(T(x + 0.15, y + 0.6, 3.1, 0.78, t, { max: 12.5, min: 8.5 }));
   });
-  o10.push(Im(7.85, 1.7, 4.9, 4.72, g.navy));
-  o10.push(T(8.1, 1.8, 4.4, 0.45, [{ text: '회신 요지', bold: true }], { pt: 15, color: '9FE3B0' }));
-  o10.push(T(8.1, 2.3, 4.45, 4.0, lines(p.reply).slice(1).map(t => ({ text: t })), { max: 12.5, min: 8.5, color: 'EEF1FB', lh: 1.3, gap: 5 }));
+  o10.push(Rc(7.85, 1.7, 4.9, 4.72, K.tint, { line: K.line })); o10.push(Rc(7.85, 1.7, 0.07, 4.72, K.navy));
+  o10.push(T(8.15, 1.82, 4.4, 0.45, [{ text: '회신 요지', bold: true }], { pt: 15, color: K.navy }));
+  o10.push(T(8.1, 2.3, 4.45, 4.0, lines(p.reply).slice(1).map(t => ({ text: t })), { max: 12.5, min: 8.5, color: '2A3150', lh: 1.32, gap: 5 }));
   S.push(o10); no++;
 
   /* 11. 맺음 */
-  const e = [];
-  e.push(Im(0, 0, SW, SH, g.navy));
-  [0, 1, 2, 3].forEach(i => e.push(Rc(-0.3, 1.2 + i * 0.3, 3.4 - i * 0.55, 0.19, i % 2 ? '2BA24A' : C.green, { k: 'para' })));
-  e.push(Im(SW / 2 - 2.4, 1.55, 4.8, 4.8 * 340 / 900, ASSET.logo));
-  e.push(T(1, 3.55, SW - 2, 0.8, [{ text: 'The Best Choice, S-Tec', bold: true }], { pt: 32, color: C.white, align: 'center' }));
-  e.push(T(1, 4.35, SW - 2, 0.5, '고객의 목소리를 구조로 개선합니다 — 재발 없는 현장을 약속드립니다.', { pt: 15, color: 'C9D1F0', align: 'center' }));
-  e.push(Rc(SW / 2 - 1.6, 5.05, 3.2, 0.03, C.green));
-  e.push(T(1, 5.2, SW - 2, 0.4, `${APP.org}  ·  ${f.dept}`, { pt: 12, color: 'AEB8E6', align: 'center' }));
-  e.push(Rc(SW / 2 - 0.85, 5.75, 1.7, 0.6, C.white));
-  e.push(Im(SW / 2 - 0.72, 5.81, 1.44, 1.44 * 53 / 127, ASSET.sanitec));
-  e.push(Rc(SW - 4.55, SH - 0.72, 4.55, 0.62, C.white, { k: 'para' }));
-  e.push(sigEl(SW - 4.15, SH - 0.62, 0.42));
-  S.push(e);
+  S.push(closingSlide({ tag: '고객의 목소리를 구조로 개선합니다 — 재발 없는 현장을 약속드립니다.', org: `${APP.org}  ·  ${f.dept}` }));
   return S;
 }
 
 /* ---------- PPT 렌더 (pptxgenjs) ---------- */
-async function makePptx(p) {
+async function makePptx(p, slidesIn, titleIn) {
   const pptx = new PptxGenJS();
-  pptx.layout = 'LAYOUT_WIDE'; pptx.author = APP.maker; pptx.company = APP.org; pptx.title = docTitle(p);
+  pptx.layout = 'LAYOUT_WIDE'; pptx.author = APP.maker; pptx.company = APP.org; pptx.title = titleIn || docTitle(p);
   const SHP = { rect: pptx.ShapeType.rect, para: pptx.ShapeType.parallelogram, chevron: pptx.ShapeType.chevron, homePlate: pptx.ShapeType.homePlate, ellipse: pptx.ShapeType.ellipse };
-  buildSlides(p).forEach(els => {
+  (slidesIn || buildSlides(p)).forEach(els => {
     const s = pptx.addSlide();
     els.forEach(e => {
       if (e.t === 'img') s.addImage({ data: e.src, x: e.x, y: e.y, w: e.w, h: e.h });
@@ -724,11 +741,11 @@ function slideDom(els) {
   });
   return d;
 }
-async function makePdf(p, onProgress) {
+async function makePdf(p, onProgress, slidesIn, titleIn) {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation: 'landscape', unit: 'in', format: [SW, SH], compress: true });
   const host = $('#render'); host.innerHTML = '';
-  const slides = buildSlides(p);
+  const slides = slidesIn || buildSlides(p);
   for (let i = 0; i < slides.length; i++) {
     onProgress && onProgress(i + 1, slides.length);
     const d = slideDom(slides[i]); host.innerHTML = ''; host.appendChild(d);
@@ -738,7 +755,7 @@ async function makePdf(p, onProgress) {
     pdf.addImage(cv.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, SW, SH);
   }
   host.innerHTML = '';
-  pdf.setProperties({ title: docTitle(p), author: APP.maker, creator: `${APP.name} ${APP.version}` });
+  pdf.setProperties({ title: titleIn || docTitle(p), author: APP.maker, creator: `${APP.name} ${APP.version}` });
   return pdf.output('blob');
 }
 
@@ -759,19 +776,44 @@ async function run(kind) {
 }
 function saveHistory(p) {
   try {
-    const h = JSON.parse(localStorage.getItem('stcr_hist') || '[]');
+    const h = readHist();
     const f2 = Object.assign({}, p.f); delete f2.siteObj;
     h.unshift({ at: fmtD(kstNow()), client: p.f.client, names: p.names, f: f2, siteId: p.site ? p.site.id : null, picked: p.items.map(x => x.S.c) });
     storeHistory(h.slice(0, 20)); renderHistory();
   } catch (e) { }
 }
 function storeHistory(h) { localStorage.setItem('stcr_hist', JSON.stringify(h)); }   // 로그인 시 서버 동기화(auth 모듈이 이 함수를 감쌈)
+function readHist() { try { return JSON.parse(localStorage.getItem('stcr_hist') || '[]'); } catch (e) { return []; } }
+const HSEL = new Set();
 function renderHistory() {
-  let h = []; try { h = JSON.parse(localStorage.getItem('stcr_hist') || '[]'); } catch (e) { }
-  $('#hist').innerHTML = h.length ? h.map((x, i) => `<li data-i="${i}"><b>${esc(x.client)}</b><span>${esc(x.names.join(', '))}</span><em>${esc(x.at)}</em></li>`).join('') : '<li class="empty">출력 기록이 없습니다.</li>';
+  const h = readHist();
+  [...HSEL].forEach(i => { if (i >= h.length) HSEL.delete(i); });
+  $('#histTools').innerHTML = h.length ? `<label class="hchk"><input type="checkbox" id="hAll" ${HSEL.size && HSEL.size === h.length ? 'checked' : ''}> 전체 선택</label>
+    <span class="hcnt">${h.length}건${HSEL.size ? ` · ${HSEL.size}건 선택` : ''}</span>
+    <button class="btn l" id="hDelSel" ${HSEL.size ? '' : 'disabled'}>🗑 선택 삭제</button><button class="btn l" id="hDelAll">전체 삭제</button>` : '';
+  $('#hist').innerHTML = h.length ? h.map((x, i) => `<li data-i="${i}" class="${HSEL.has(i) ? 'sel' : ''}"><input type="checkbox" class="hsel" data-i="${i}" ${HSEL.has(i) ? 'checked' : ''} aria-label="선택">
+      <div class="hb"><b>${esc(x.client)}</b><span>${esc((x.names || []).join(', '))}</span><em>${esc(x.at)}</em></div>
+      <button class="hdel" data-del="${i}" title="이 기록 삭제">🗑</button></li>`).join('') : '<li class="empty">출력 기록이 없습니다.</li>';
+  if (!h.length) return;
+  $('#hAll').onchange = e => { HSEL.clear(); if (e.target.checked) h.forEach((_, i) => HSEL.add(i)); renderHistory(); };
+  $('#hDelSel').onclick = () => confirmDel(`선택한 ${HSEL.size}건을 삭제할까요?`, () => { storeHistory(readHist().filter((_, i) => !HSEL.has(i))); HSEL.clear(); renderHistory(); toast('선택한 기록을 삭제했습니다'); });
+  $('#hDelAll').onclick = () => confirmDel(`출력 기록 ${h.length}건을 모두 삭제할까요?`, () => { storeHistory([]); HSEL.clear(); renderHistory(); toast('출력 기록을 모두 삭제했습니다'); });
+}
+function confirmDel(msg, ok) {
+  openModal(`<h2>기록 삭제</h2><div class="sub">${esc(msg)}<br>삭제한 기록은 되살릴 수 없습니다. (로그인 시 다른 기기에서도 함께 지워집니다)</div>
+    <div class="mrow"><button class="btn" id="mClose">취소</button><button class="btn pri" id="dOk" style="background:#C62828">삭제</button></div>`, md => {
+    md.querySelector('#mClose').onclick = closeModal; md.querySelector('#dOk').onclick = () => { closeModal(); ok(); };
+  });
+}
+function histClick(e) {
+  const del = e.target.closest('[data-del]');
+  if (del) { const i = +del.dataset.del, h = readHist(); confirmDel(`「${h[i] ? h[i].client : ''}」 기록을 삭제할까요?`, () => { const hh = readHist(); hh.splice(i, 1); HSEL.clear(); storeHistory(hh); renderHistory(); toast('기록을 삭제했습니다'); }); return; }
+  const cb = e.target.closest('.hsel');
+  if (cb) { const i = +cb.dataset.i; cb.checked ? HSEL.add(i) : HSEL.delete(i); renderHistory(); return; }
+  const li = e.target.closest('li[data-i]'); if (li) loadHistory(+li.dataset.i);
 }
 function loadHistory(i) {
-  const h = JSON.parse(localStorage.getItem('stcr_hist') || '[]')[i]; if (!h) return;
+  const h = readHist()[i]; if (!h) return;
   const map = { client: 'f_client', site: 'f_site', job: 'f_job', recvDate: 'f_date', occur: 'f_occur', channel: 'f_channel', raiser: 'f_raiser', workers: 'f_workers', author: 'f_author', dept: 'f_dept', content: 'f_content', demand: 'f_demand', facts: 'f_facts' };
   Object.entries(map).forEach(([k, id]) => $('#' + id).value = h.f[k] || '');
   if (h.siteId) { const st = SITES.find(x => x.id === h.siteId); if (st) selectSite(st, true); }
@@ -803,10 +845,10 @@ async function init() {
   $('#sugg').addEventListener('click', e => { const b = e.target.closest('button.sg'); if (b && !state.picked.includes(b.dataset.c)) togglePick(b.dataset.c); });
   $('#btnSugg').onclick = suggest;
   $('#btnSample').onclick = sample;
-  $('#btnGen').onclick = () => { const p = buildPlan(); if (!p) return; state.plan = p; renderEditor(p); toast('대응방안이 생성되었습니다. 검토 후 출력하세요.'); if (innerWidth < 1100) $('#outPanel').scrollIntoView({ behavior: 'smooth' }); };
+  $('#btnGen').onclick = () => { const p = buildPlan(); if (!p) return; state.plan = p; renderEditor(p); renderWorkerForm(); toast('대응방안이 생성되었습니다. 검토 후 출력하세요.'); if (innerWidth < 1100) $('#outPanel').scrollIntoView({ behavior: 'smooth' }); };
   document.querySelectorAll('input[name=mode]').forEach(r => r.onchange = () => { if (state.plan) { syncEditor(); renderEditor(state.plan); } });
   $('#btnDocx').onclick = () => run('docx'); $('#btnPptx').onclick = () => run('pptx'); $('#btnPdf').onclick = () => run('pdf'); $('#btnAll').onclick = () => run('all');
-  $('#hist').addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) loadHistory(+li.dataset.i); });
+  $('#hist').addEventListener('click', histClick);
   await buildSignature(kstNow());
   $('#sigImg').src = state.sigDataUrl;
 }

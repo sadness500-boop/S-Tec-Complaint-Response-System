@@ -144,7 +144,8 @@ function siteMatches(st, q) { return !q || (st.name + ' ' + st.addr + ' ' + st.w
 function renderSites() {
   const q = ($('#sq').value || '').trim().toLowerCase(), br = UI.br || '';
   document.querySelectorAll('#brChips button').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.br || '') === br)));
-  const list = SITES.filter(st => (!br || st.br === br) && siteMatches(st, q));
+  const allow = (window.APP_ACCESS && APP_ACCESS.branches && APP_ACCESS.branches.length) ? APP_ACCESS.branches : null;   // 프로그램별 권한 · 관리 범위(지사)
+  const list = SITES.filter(st => (!allow || allow.includes(st.br)) && (!br || st.br === br) && siteMatches(st, q));
   $('#siteCnt').textContent = `${list.length}곳 · ${list.reduce((a, s) => a + (s.total || 0), 0)}명`;
   $('#siteList').innerHTML = list.length ? list.map(st => `<li class="st ${state.site && state.site.id === st.id ? 'on' : ''}" data-id="${st.id}">
       <span class="brb b-${st.br}">${st.br}</span><span class="nm">${esc(st.name)}<small>${esc(st.addr)}</small></span>
@@ -182,7 +183,11 @@ function renderSiteInfo() {
 function uiInit() {
   $('#appIcon').src = ASSET.icon; $('#gateLogo').src = ASSET.logo;
   $('#ver').textContent = APP.version;
-  $('#brChips').innerHTML = `<button data-br="">전체</button>` + BRANCHES.map(b => `<button data-br="${b.key}">${b.key}</button>`).join('');
+  const chips = () => { const allow = (window.APP_ACCESS && APP_ACCESS.branches && APP_ACCESS.branches.length) ? APP_ACCESS.branches : null;
+    $('#brChips').innerHTML = `<button data-br="">${allow ? '담당 전체' : '전체'}</button>` + BRANCHES.filter(b => !allow || allow.includes(b.key)).map(b => `<button data-br="${b.key}">${b.key}</button>`).join('');
+    if (allow && UI.br && !allow.includes(UI.br)) UI.br = ''; };
+  chips();
+  window.addEventListener('app-access', () => { chips(); renderSites(); });
   $('#brChips').onclick = e => { const b = e.target.closest('button'); if (!b) return; UI.br = b.dataset.br; saveUI(); renderSites(); };
   $('#sq').addEventListener('input', renderSites);
   $('#siteList').onclick = e => { const li = e.target.closest('li.st'); if (li) selectSite(SITES.find(x => x.id === +li.dataset.id)); };
