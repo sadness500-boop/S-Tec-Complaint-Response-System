@@ -87,8 +87,31 @@ body.dark .sg{background:#173a26;color:#BFF0CF;border-color:#2c7a45}
 /* 출력 */
 .out .card{position:static}
 #editor{max-height:62vh;overflow:auto;padding-right:4px}
-.placeholder{padding:40px 20px;text-align:center;color:var(--gray)}
-.placeholder img{width:200px;opacity:.9}
+.placeholder{padding:14px 14px 22px;text-align:center;color:var(--gray)}
+.vstage{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#0d1530;box-shadow:0 6px 18px rgba(16,28,70,.22);margin:0 0 16px;text-align:left}
+.vstage video,.vstage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.vstage video{opacity:0}.vstage video.on{opacity:1}
+.vstage canvas{opacity:0;pointer-events:none;image-rendering:pixelated}.vstage canvas.on{opacity:1}
+.vstage .vtop{position:absolute;left:12px;top:10px;right:12px;display:flex;gap:8px;align-items:flex-start;pointer-events:none}
+.vstage .vbadge{background:rgba(200,85,61,.92);color:#fff;font-size:11.5px;font-weight:700;padding:4px 9px;border-radius:999px;letter-spacing:.2px;white-space:nowrap}
+.vstage .vrec{margin-left:auto;background:rgba(0,0,0,.45);color:#fff;font-size:11px;padding:4px 8px;border-radius:999px;display:flex;align-items:center;gap:5px}
+.vstage .vrec i{width:7px;height:7px;border-radius:50%;background:#ff4d4d;animation:vblink 1.2s infinite}
+@keyframes vblink{50%{opacity:.25}}
+.vstage .vbot{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 10px;background:linear-gradient(transparent,rgba(8,14,40,.88));color:#fff;transition:opacity .35s}
+.vstage .vbot.fade{opacity:0}
+.vstage .vt{font-size:15.5px;font-weight:800;line-height:1.3}
+.vstage .vs{font-size:12px;opacity:.85;margin-top:3px}
+.vstage .vrow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.vstage .vchip{font-size:11px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:2px 8px;border-radius:999px}
+.vstage .vbtn{border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:700;border-radius:8px;padding:6px 10px;background:#fff;color:#18224F}
+.vstage .vbtn.g{background:rgba(255,255,255,.18);color:#fff}
+.vstage .vdots{display:flex;gap:5px;margin-left:auto}
+.vstage .vdots button{width:22px;height:5px;border-radius:3px;border:0;padding:0;background:rgba(255,255,255,.35);cursor:pointer;overflow:hidden;position:relative}
+.vstage .vdots button.on{background:rgba(255,255,255,.35)}
+.vstage .vdots button.on b{position:absolute;left:0;top:0;bottom:0;background:#fff;width:0}
+@media (prefers-reduced-motion:reduce){.vstage .vrec i{animation:none}}
+@media (max-width:820px){.vstage .vs,.vstage #vChips{display:none}.vstage .vbot{padding-top:24px}.vstage .vt{font-size:14px}}
+
 .ed-head{display:flex;align-items:center;gap:10px;justify-content:space-between;font-size:13px;padding:2px 0 6px}
 .sevbig{color:#fff;padding:4px 14px;font-weight:700;clip-path:polygon(10% 0,100% 0,90% 100%,0 100%)}
 .ed-tip{font-size:11.8px;color:var(--gray);margin:0 0 8px;background:var(--soft);padding:7px 10px;border-radius:8px}
@@ -363,7 +386,7 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
   <section class="out">
     <div class="card" id="outPanel">
       <h2><span class="stepn">4</span> Complaint 대응 방안 · 출력 <span class="r">검토 · 편집 후 출력</span></h2>
-      <div class="body"><div id="editor"><div class="placeholder"><img id="logo2" alt=""><p>왼쪽에서 Complaint 항목을 고르고 내용을 입력한 뒤<br><b>[대응방안 생성]</b>을 누르세요.</p><p class="hint">제출용은 근무자 징계 내용이 빠지고, 내부 보고용은 징계 기준까지 포함됩니다.</p></div></div></div>
+      <div class="body"><div id="editor"><div class="placeholder"><div class="vstage" id="vStage"></div><p>왼쪽에서 Complaint 항목을 고르고 내용을 입력한 뒤<br><b>[대응방안 생성]</b>을 누르세요.</p><p class="hint">제출용은 근무자 징계 내용이 빠지고, 내부 보고용은 징계 기준까지 포함됩니다.</p></div></div></div>
       <div class="outbtns">
         <button class="btn" id="btnDocx" style="background:#2b579a;box-shadow:0 3px 0 #173361">📄 Word<small>머리글·바닥글 서식</small></button>
         <button class="btn" id="btnPptx" style="background:#C43E1C;box-shadow:0 3px 0 #7d2712">📊 PPT<small>16:9 발표자료</small></button>

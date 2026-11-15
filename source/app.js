@@ -1,12 +1,12 @@
 /* =====================================================================
- * S-Tec Complaint Response System v1.3.0 — 앱 로직
+ * S-Tec Complaint Response System v1.4.0 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.3.0',
+  version: 'v1.4.0',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
@@ -906,7 +906,7 @@ function sample() {
 }
 
 async function init() {
-  $('#logo2').src = ASSET.logo;
+  if ($('#logo2')) $('#logo2').src = ASSET.logo;
   $('#jobList').innerHTML = JOBS.map(j => `<option value="${j}">`).join('');
   $('#f_sev').innerHTML = '<option value="">자동 판정</option>' + Object.entries(SEV).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
   const t = kstNow(); $('#f_date').value = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;

@@ -197,7 +197,7 @@ function uiInit() {
   ['f_author', 'f_dept'].forEach(id => $('#' + id).addEventListener('input', e => e.target.dataset.touched = '1'));
   $('#mgrCard').onclick = openMgr; $('#qrCard').onclick = openQR; $('#refCard').onclick = openRef;
   document.querySelectorAll('[data-theme-set]').forEach(b => b.onclick = () => applyTheme(b.dataset.themeSet));
-  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap();
+  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap(); initVidStage();
 }
 
 /* =====================================================================
@@ -253,4 +253,65 @@ function drawPins() {
   MAP.map.relayout();
   if (state.site && state.site.lat) { MAP.map.setLevel(6); MAP.map.panTo(new k.LatLng(state.site.lat, state.site.lng)); }
   else if (n) MAP.map.setBounds(bounds, 30, 30, 30, 30);
+}
+
+/* ===== 메인 화면 Complaint 사례 영상 (모자이크 전환) — Designed & Developed by Rat Rae Choi ===== */
+const VCASES = [
+  { f: 'cmp1', t: '미화 근무 중 고객 물품 부주의 취급', s: '사무실 청소 중 책상 위 물품을 함부로 다루고 정리 기준을 지키지 않음', job: '미화', codes: ['E1-02', 'B1-01'] },
+  { f: 'cmp2', t: '방문객 응대 중 신체 접촉·고압적 태도', s: '로비 경비원이 방문객을 손으로 밀며 응대 — 불친절·마찰 민원', job: '보안', codes: ['B1-01', 'B3-01'] },
+  { f: 'cmp3', t: '상황실 근무 중 졸음', s: 'CCTV 관제 중 졸음으로 모니터 감시 공백 발생', job: '보안', codes: ['A2-01'] },
+  { f: 'cmp4', t: '상황실 근무 중 유튜브 시청', s: '관제 모니터로 개인 영상을 시청하며 감시 업무 소홀', job: '보안', codes: ['A2-02'] }
+];
+const VST = { i: 0, busy: false, muted: true, paused: false };
+function vSrc(f, ext) { const rel = `media/main/${f}.${ext}`; return location.protocol === 'file:' ? APP.shareUrl + rel : rel; }
+function initVidStage() {
+  const box = document.getElementById('vStage'); if (!box || box.dataset.ready) return; box.dataset.ready = '1';
+  box.innerHTML = `<video id="vA" muted playsinline preload="auto"></video><video id="vB" muted playsinline preload="auto"></video><canvas id="vFx"></canvas>
+    <div class="vtop"><span class="vbadge" id="vBadge"></span><span class="vrec"><i></i>근무 중 영상</span></div>
+    <div class="vbot" id="vBot"><div class="vt" id="vT"></div><div class="vs" id="vS"></div>
+      <div class="vrow"><span id="vChips"></span><button class="vbtn" id="vUse" title="이 사례의 Complaint 항목을 ② 분류에 선택">이 사례로 작성 ▸</button>
+      <button class="vbtn g" id="vSnd" title="소리">🔇</button><button class="vbtn g" id="vPlay" title="일시정지">❚❚</button><span class="vdots" id="vDots"></span></div></div>`;
+  VST.v = [box.querySelector('#vA'), box.querySelector('#vB')]; VST.cv = box.querySelector('#vFx'); VST.box = box; VST.cur = 0;
+  VST.small = document.createElement('canvas');
+  $('#vDots').innerHTML = VCASES.map((_, k) => `<button data-k="${k}" aria-label="사례 ${k + 1}"><b></b></button>`).join('');
+  $('#vDots').onclick = e => { const b = e.target.closest('button'); if (b) vGo(+b.dataset.k); };
+  $('#vUse').onclick = () => { const c = VCASES[VST.i]; let n = 0; c.codes.forEach(code => { if (!state.picked.includes(code) && state.picked.length < MAX_PICK) { state.picked.push(code); n++; } });
+    renderTree($('#q').value); renderPicked(); toast(n ? `「${c.t}」 사례 항목 ${n}개를 선택했습니다. ③에 내용을 적어 주세요.` : '이미 선택된 항목입니다.');
+    const fc = $('#formCard'); if (fc) fc.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  $('#vSnd').onclick = () => { VST.muted = !VST.muted; VST.v.forEach(v => v.muted = VST.muted); $('#vSnd').textContent = VST.muted ? '🔇' : '🔊'; };
+  $('#vPlay').onclick = () => { VST.paused = !VST.paused; const v = VST.v[VST.cur]; VST.paused ? v.pause() : v.play().catch(() => {}); $('#vPlay').textContent = VST.paused ? '▶' : '❚❚'; };
+  VST.v.forEach((v, k) => {
+    v.addEventListener('timeupdate', () => { if (k !== VST.cur || VST.busy) return; vProg(v); if (v.duration && v.duration - v.currentTime < 0.6) vGo((VST.i + 1) % VCASES.length); });
+    v.addEventListener('ended', () => { if (k === VST.cur && !VST.busy) vGo((VST.i + 1) % VCASES.length); });
+    v.addEventListener('error', () => { if (k === VST.cur && !VST.busy) setTimeout(() => vGo((VST.i + 1) % VCASES.length), 1500); });
+  });
+  vLoad(VST.v[0], 0); VST.v[0].classList.add('on'); vCap(0); VST.v[0].play().catch(() => {});
+  document.addEventListener('visibilitychange', () => { const v = VST.v && VST.v[VST.cur]; if (!v || !v.isConnected) return; document.hidden ? v.pause() : (!VST.paused && v.play().catch(() => {})); });
+}
+function vLoad(v, i) { v.poster = vSrc(VCASES[i].f, 'jpg'); v.src = vSrc(VCASES[i].f, 'mp4'); v.muted = VST.muted; v.load(); }
+function vProg(v) { const b = $('#vDots button.on b'); if (b && v.duration) b.style.width = (100 * v.currentTime / v.duration) + '%'; }
+function vCap(i) {
+  const c = VCASES[i]; $('#vBadge').textContent = `고객 불만 유발 사례 ${i + 1}/${VCASES.length} · ${c.job}`; $('#vT').textContent = c.t; $('#vS').textContent = c.s;
+  $('#vChips').innerHTML = c.codes.map(code => { const x = kbFlatSmalls().find(o => o.S.c === code); return x ? `<span class="vchip">${code} ${esc(x.S.n)}</span>` : ''; }).join(' ');
+  document.querySelectorAll('#vDots button').forEach((b, k) => { b.classList.toggle('on', k === i); b.querySelector('b').style.width = k < i ? '100%' : '0'; });
+}
+function vGo(next) {
+  if (!VST.box || !VST.box.isConnected || VST.busy || next === VST.i) return;
+  VST.busy = true; const oldV = VST.v[VST.cur], nk = 1 - VST.cur, newV = VST.v[nk];
+  vLoad(newV, next); newV.currentTime = 0; if (!VST.paused) newV.play().catch(() => {});
+  const cv = VST.cv, sm = VST.small, ctx = cv.getContext('2d'), sx = sm.getContext('2d');
+  const r = VST.box.getBoundingClientRect(), W = cv.width = Math.max(320, Math.round(r.width)), H = cv.height = Math.round(W * 9 / 16);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, D = reduce ? 300 : 1100, t0 = performance.now();
+  $('#vBot').classList.add('fade'); cv.classList.add('on'); let swapped = false;
+  const step = now => {
+    const t = Math.min(1, (now - t0) / D), half = t < 0.5, src = half ? oldV : newV;
+    const e = Math.sin(Math.PI * t), blk = reduce ? 1 : Math.max(1, Math.round(2 + 54 * e * e));
+    if (!half && !swapped) { swapped = true; oldV.classList.remove('on'); newV.classList.add('on'); VST.cur = nk; VST.i = next; vCap(next); }
+    const w = Math.max(2, Math.round(W / blk)), h = Math.max(2, Math.round(H / blk)); sm.width = w; sm.height = h;
+    try { sx.drawImage(src, 0, 0, w, h); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = 1; ctx.drawImage(sm, 0, 0, W, H);
+      if (!reduce) { ctx.globalAlpha = 0.18 * e; ctx.fillStyle = '#0b1f8f'; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; } } catch (_) { }
+    if (t < 1) requestAnimationFrame(step);
+    else { cv.classList.remove('on'); $('#vBot').classList.remove('fade'); oldV.pause(); VST.busy = false; }
+  };
+  requestAnimationFrame(step);
 }
