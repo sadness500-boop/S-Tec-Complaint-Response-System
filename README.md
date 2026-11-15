@@ -36,8 +36,8 @@
 
 | 문서 | Word | PPT |
 |---|---|---|
-| 사용자 매뉴얼 | [docx](docs/S-Tec-Complaint-Response-System_사용자매뉴얼_v1.3.0.docx) | [pptx](docs/S-Tec-Complaint-Response-System_사용자매뉴얼_v1.3.0.pptx) |
-| 제작자 관리 사용매뉴얼 | [docx](docs/S-Tec-Complaint-Response-System_제작자관리매뉴얼_v1.3.0.docx) | [pptx](docs/S-Tec-Complaint-Response-System_제작자관리매뉴얼_v1.3.0.pptx) |
+| 사용자 매뉴얼 | [docx](docs/S-Tec-Complaint-Response-System_사용자매뉴얼_v1.5.0.docx) | [pptx](docs/S-Tec-Complaint-Response-System_사용자매뉴얼_v1.5.0.pptx) |
+| 제작자 관리 사용매뉴얼 | [docx](docs/S-Tec-Complaint-Response-System_제작자관리매뉴얼_v1.5.0.docx) | [pptx](docs/S-Tec-Complaint-Response-System_제작자관리매뉴얼_v1.5.0.pptx) |
 
 ## 에스텍 통합 로그인 · 프로그램별 권한 (v1.2.0)
 
