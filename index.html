@@ -3883,9 +3883,10 @@ function drawPins() {
 }
 
 /* ===== 메인 화면 Complaint 사례 영상 (모자이크 전환) — Designed & Developed by Rat Rae Choi ===== */
-const VCASES = [   /* 직종이 번갈아 나오도록 배치 */
-  { f: 'cmp3', t: '상황실 근무 중 졸음', s: 'CCTV 관제 중 졸음으로 모니터 감시 공백 발생', job: '보안', codes: ['A2-01'] },
+const VCASES = [   /* 하루 근무 흐름 순서 · 직종이 번갈아 나오도록 배치 */
+  { f: 'cmp8', t: '출근 지각·교대 시간 미준수', s: '교대 시간이 지나 허둥지둥 출입 게이트를 통과 — 앞 근무자 퇴근 지연·초소 공백', job: '보안', codes: ['A3-01', 'C4-03'] },
   { f: 'cmp5', t: '주차 관리소 근무 중 휴대폰 사용', s: '주차 관리소에 앉아 휴대폰만 보며 출입 차량 확인·안내를 소홀히 함', job: '주차', codes: ['A2-02', 'F1-01'] },
+  { f: 'cmp3', t: '상황실 근무 중 졸음', s: 'CCTV 관제 중 졸음으로 모니터 감시 공백 발생', job: '보안', codes: ['A2-01'] },
   { f: 'cmp1', t: '미화 근무 중 고객 물품 부주의 취급', s: '사무실 청소 중 책상 위 물품을 함부로 다루고 정리 기준을 지키지 않음', job: '미화', codes: ['E1-02', 'B1-01'] },
   { f: 'cmp6', t: '기계실 근무 중 흡연', s: '전기·기계 설비가 있는 기계실 안에서 담배를 피움 — 화재 위험·금연구역 위반', job: '시설', codes: ['A2-04', 'D1-02'] },
   { f: 'cmp2', t: '방문객 응대 중 신체 접촉·고압적 태도', s: '로비 경비원이 방문객을 손으로 밀며 응대 — 불친절·마찰 민원', job: '보안', codes: ['B1-01', 'B3-01'] },
@@ -4223,14 +4224,14 @@ function initIntake() {
 }
 </script>
 <script>/* =====================================================================
- * S-Tec Complaint Response System v1.5.1 — 앱 로직
+ * S-Tec Complaint Response System v1.5.2 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.5.1',
+  version: 'v1.5.2',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',

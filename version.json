@@ -1,7 +1,7 @@
 {
-  "version": "1.5.1",
-  "date": "2026-11-15",
-  "note": "메인 화면 사례 영상 7편(주차 휴대폰·기계실 흡연·주차장 근무지 이탈 추가, 직종 번갈아 재생)",
-  "html": "releases/S-Tec-Complaint-Response-System_v1.5.1.html",
-  "apk": "releases/S-Tec-Complaint-Response-System_v1.5.1.apk"
+  "version": "1.5.2",
+  "date": "2026-11-16",
+  "note": "메인 화면 사례 영상 8편(출근 지각·교대 시간 미준수 추가)",
+  "html": "releases/S-Tec-Complaint-Response-System_v1.5.2.html",
+  "apk": "releases/S-Tec-Complaint-Response-System_v1.5.2.apk"
 }
