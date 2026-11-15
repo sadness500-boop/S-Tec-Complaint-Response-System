@@ -41,8 +41,8 @@ button{font-family:inherit;cursor:pointer}
 /* 트리 */
 .search{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--ink);font-family:inherit;margin-bottom:10px}
 #tree{max-height:46vh;overflow:auto;padding-right:4px}
-details.big{border:1px solid var(--line);border-radius:10px;margin-bottom:7px;background:var(--card)}
-details.big>summary{padding:9px 11px;font-weight:700;cursor:pointer;list-style:none;display:flex;gap:6px;align-items:center;border-left:5px solid var(--navy);border-radius:10px}
+details.big{border:1px solid var(--line);border-radius:10px;margin-bottom:4px;background:var(--card)}
+details.big>summary{padding:6px 10px;font-size:14px;font-weight:700;cursor:pointer;list-style:none;display:flex;gap:6px;align-items:center;border-left:5px solid var(--navy);border-radius:10px}
 details.big[open]>summary{background:var(--soft);border-left-color:var(--green)}
 details.big>summary .ic{font-size:15px}
 details.mid{margin:4px 8px 6px 14px}
@@ -266,7 +266,7 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
 .kpin i{display:block;width:12px;height:12px;border-radius:50%;background:var(--c);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.45)}
 .kpin.on i{width:18px;height:18px;border-width:3px;box-shadow:0 0 0 4px rgba(30,139,58,.35),0 2px 6px rgba(0,0,0,.4)}
 .kpin span{background:#0b1757;color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-#siteList{max-height:26vh}
+#siteList{max-height:16vh}#mapCard .smap-h{margin-top:0}
 /* 바닥 */
 .foot{position:fixed;left:0;right:0;bottom:0;background:var(--navyD);color:#C9D1F0;font-size:11.5px;z-index:15;border-top:3px solid var(--green)}
 .foot .in{max-width:1680px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:6px 22px}
@@ -327,13 +327,10 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
       <input class="search" id="sq" placeholder="🔍 사업장명·주소·업종 검색">
       <ul id="siteList"></ul>
       <button class="btn l" id="siteManual" type="button">✎ 목록에 없는 사업장 직접 입력</button>
-      <div class="smap-h">🗺 사업장 위치 <small>카카오맵 · 지사별 색</small><span class="lg"><i style="--c:#1E8B3A"></i>동부<i style="--c:#0B1F8F"></i>서부<i style="--c:#C2410C"></i>남부<i style="--c:#6D28D9"></i>중부</span></div>
-      <div id="siteMap" class="smap nomap"></div>
-      <div class="smap-cap" id="mapCap"></div>
     </div>
   </section>
   <!-- ② 분류 -->
-  <section class="card">
+  <section class="card" id="treeCard">
     <h2><span class="stepn">2</span> Complaint 분류 <span class="r">대 · 중 · 소</span></h2>
     <div class="body">
       <input class="search" id="q" placeholder="🔍 항목·키워드 검색 (예: 화재경보, 유튜브, 교체)">
@@ -341,6 +338,14 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
       <ul class="principle">
         <li><b style="color:#C62828">중대</b> 즉시 경영 보고 · <b style="color:#EF6C00">주요</b> 7일 내 종결 · <b style="color:#2E7D32">일반</b> 현장 개선</li>
       </ul>
+    </div>
+  </section>
+  <!-- 사업장 위치 (카카오맵) -->
+  <section class="card" id="mapCard">
+    <div class="body">
+      <div class="smap-h">🗺 사업장 위치 <small>카카오맵 · 지사별 색</small><span class="lg"><i style="--c:#1E8B3A"></i>동부<i style="--c:#0B1F8F"></i>서부<i style="--c:#C2410C"></i>남부<i style="--c:#6D28D9"></i>중부</span></div>
+      <div id="siteMap" class="smap nomap"></div>
+      <div class="smap-cap" id="mapCap"></div>
     </div>
   </section>
   </div>
@@ -3793,7 +3798,7 @@ function uiInit() {
   ['f_author', 'f_dept'].forEach(id => $('#' + id).addEventListener('input', e => e.target.dataset.touched = '1'));
   $('#mgrCard').onclick = openMgr; $('#qrCard').onclick = openQR; $('#refCard').onclick = openRef;
   document.querySelectorAll('[data-theme-set]').forEach(b => b.onclick = () => applyTheme(b.dataset.themeSet));
-  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap(); initVidStage();
+  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap(); initVidStage(); fitTree(); setTimeout(fitTree, 400); addEventListener('resize', fitTree);
 }
 
 /* =====================================================================
@@ -3911,16 +3916,24 @@ function vGo(next) {
   };
   requestAnimationFrame(step);
 }
+
+/* ② Complaint 분류가 첫 화면 안에 보이도록 — 트리 높이를 화면 아래 끝에 맞춤 */
+function fitTree() {
+  const t = document.getElementById('tree'); if (!t) return;
+  if (innerWidth <= 820) { t.style.maxHeight = ''; return; }
+  const top = t.getBoundingClientRect().top + scrollY, foot = (document.querySelector('.foot') || {}).offsetHeight || 0;
+  t.style.maxHeight = Math.max(140, Math.round(innerHeight - top - 66 - (getComputedStyle(document.querySelector('.foot') || document.body).position === 'fixed' ? foot : 0))) + 'px';
+}
 </script>
 <script>/* =====================================================================
- * S-Tec Complaint Response System v1.4.0 — 앱 로직
+ * S-Tec Complaint Response System v1.4.1 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.4.0',
+  version: 'v1.4.1',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
@@ -4260,6 +4273,25 @@ async function makeDocx(p) {
 
   return await packDocx(ch, docTitle(p));
 }
+/* Office 파일 정리: 폴더 항목 제거(OneDrive·클라우드 폴더에서 열기 오류 방지), [Content_Types] 맨 앞,
+   PPT 슬라이드 도형 ID 중복 제거(영상 슬라이드 복구 오류 방지) + 영상 재생 타이밍 */
+async function ooxmlPack(zip, mime, pptx) {
+  const out = new JSZip(), names = Object.keys(zip.files).filter(n => !zip.files[n].dir);
+  names.sort((a, b) => (a === '[Content_Types].xml' ? -1 : b === '[Content_Types].xml' ? 1 : a.startsWith('_rels/') ? -1 : b.startsWith('_rels/') ? 1 : 0));
+  for (const n of names) {
+    if (pptx && /^ppt\/slides\/slide\d+\.xml$/.test(n)) {
+      let x = await zip.file(n).async('string'), id = 0; const vids = [];
+      x = x.replace(/<p:cNvPr id="\d+"([^>]*)>(<a:hlinkClick r:id="" action="ppaction:\/\/media"\/>)?/g, (m, rest, media) => { id++; if (media) vids.push(id); return `<p:cNvPr id="${id}"${rest}>${media || ''}`; });
+      if (vids.length && !x.includes('<p:timing>')) {
+        let t = 2; const nodes = vids.map(v => `<p:video><p:cMediaNode vol="80000"><p:cTn id="${t++}" fill="hold" display="0"><p:stCondLst><p:cond delay="indefinite"/></p:stCondLst></p:cTn><p:tgtEl><p:spTgt spid="${v}"/></p:tgtEl></p:cMediaNode></p:video>`).join('');
+        const tm = `<p:timing><p:tnLst><p:par><p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>${nodes}</p:childTnLst></p:cTn></p:par></p:tnLst></p:timing>`;
+        x = x.replace(/(<\/p:clrMapOvr>|<\/p:cSld>)(?![\s\S]*<\/p:clrMapOvr>)/, '$1' + tm);
+      }
+      out.file(n, x, { createFolders: false });
+    } else out.file(n, await zip.file(n).async('uint8array'), { createFolders: false });
+  }
+  return await out.generateAsync({ type: 'blob', mimeType: mime, compression: 'DEFLATE' });
+}
 async function packDocx(ch, title) {
   const doc = new docx.Document({
     creator: APP.maker, title, description: `${APP.name} ${APP.version}`,
@@ -4299,7 +4331,7 @@ async function applyHeaderFooter(blob) {
   });
   if (!/xmlns:r=/.test(d.slice(0, 2000))) d = d.replace('<w:document ', '<w:document xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
   zip.file('word/document.xml', d);
-  return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression: 'DEFLATE' });
+  return await ooxmlPack(zip, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }
 
 /* =====================================================================
@@ -4427,7 +4459,7 @@ function coverSlide(o) {
   c.push(Rc(7.75, 0, 0.04, SH, K.line));
   if (o.fig) c.push(figBox(o.fig, 8.1, 0.55, 4.95, 5.55)); else c.push(Im(8.45, 0.95, 4.2, 4.2 * (o.ratio || 1046 / 1024), o.img || ASSET.cube));
   c.push(Rc(0, 0, 0.12, SH, K.ink)); c.push(Rc(0.12, 0, 0.05, SH, C.green));
-  c.push(Im(0.85, 0.75, 2.1, 2.1 * 340 / 900, ASSET.logo));
+  c.push(Im(0.85, 0.55, 1.55, 1.55, ASSET.voc));  /* 표지 로고 = 앱 아이콘 */
   c.push(Rc(0.85, 2.55, 0.5, 0.05, C.green));
   c.push(T(0.85, 2.7, 6.6, 0.4, o.eyebrow, { pt: 13, color: C.green, bold: true }));
   c.push(T(0.85, 3.1, 6.7, 1.25, [{ text: o.title, bold: true }], { max: 36, min: 24, color: K.ink, lh: 1.15 }));
@@ -4701,7 +4733,7 @@ async function makePptx(p, slidesIn, titleIn) {
       }
     });
   });
-  return await pptx.write({ outputType: 'blob' });
+  return await ooxmlPack(await JSZip.loadAsync(await pptx.write({ outputType: 'blob' })), 'application/vnd.openxmlformats-officedocument.presentationml.presentation', true);
 }
 
 /* ---------- PDF 렌더 (같은 슬라이드 모델 → HTML → 이미지 → PDF) ---------- */

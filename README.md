@@ -2,7 +2,7 @@
 
 <img src="icons/icon-192.png" width="96" alt="S-Tec Complaint 아이콘">
 
-**에스텍 그룹 고객사 Complaint 대응 프로그램** · v1.4.0
+**에스텍 그룹 고객사 Complaint 대응 프로그램** · v1.4.1
 
 고객사가 제기한 Complaint를 **① 발생 사업장 선정 → ② 대·중·소 분류 → ③ 내용 작성 → ④ 출력** 순서로 처리하면,
 대응방안을 **Word(머리글·바닥글 서식) · PPT(16:9) · PDF(PPT와 같은 디자인)** 3종으로 바로 만들어 줍니다. 웹 버전과 안드로이드 앱(APK)으로 씁니다.
@@ -12,9 +12,9 @@
 | 구분 | 파일 | 주소 |
 |---|---|---|
 | 웹 버전 | [index.html](index.html) | https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/ |
-| 웹 버전 (버전별) | [releases/S-Tec-Complaint-Response-System_v1.4.0.html](releases/S-Tec-Complaint-Response-System_v1.4.0.html) | |
+| 웹 버전 (버전별) | [releases/S-Tec-Complaint-Response-System_v1.4.1.html](releases/S-Tec-Complaint-Response-System_v1.4.1.html) | |
 | 안드로이드 앱 (최신) | `stcr-latest.apk` | https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk |
-| 안드로이드 앱 (버전별) | `releases/S-Tec-Complaint-Response-System_v1.4.0.apk` | 릴리스 `v1.4.0` |
+| 안드로이드 앱 (버전별) | `releases/S-Tec-Complaint-Response-System_v1.4.1.apk` | 릴리스 `v1.4.1` |
 
 - **APK는 GitHub Actions가 만듭니다.** `index.html` 또는 `version.json`을 올리면 Actions 탭의 "Android APK"가 실행되어 약 5분 뒤 `releases/` 폴더와 릴리스에 버전 이름이 붙은 APK가 올라갑니다. Actions 탭 › Android APK › Run workflow 로 직접 실행할 수도 있습니다.
 - **안드로이드 설치:** APK 내려받기 → "출처를 알 수 없는 앱 설치 허용" → 설치. Play 프로텍트 경고가 뜨면 "무시하고 설치".
@@ -76,6 +76,7 @@ package.json · capacitor.config.json · android-keystore/   안드로이드 앱
 
 ## 변경 이력
 
+- **v1.4.1** (2026-11-15) — PPT가 PowerPoint에서 「복구」 오류로 열리지 않던 문제 수정(영상 슬라이드 도형 ID 중복 제거·영상 재생 정보 추가·파일 내 폴더 항목 제거, Word도 동일 정리), ② Complaint 분류를 첫 화면에 배치(카카오맵은 분류 아래로), 고객사·근무자 PPT·PDF 표지 로고를 앱 아이콘(VOC)으로 교체
 - **v1.4.0** (2026-11-15) — 메인 화면 ④ 영역에 고객 불만 유발 사례 영상 4편(미화 물품 부주의·방문객 고압 응대·상황실 졸음·유튜브 시청) 자동 연속 재생, 영상 전환 시 모자이크 효과, 「이 사례로 작성」으로 해당 Complaint 항목 자동 선택 (media/main)
 - **v1.3.0** (2026-11-14) — PC 설치 앱 아이콘 갱신(manifest id·아이콘 캐시 갱신), ① 사업장 목록 아래 카카오맵 위치(지사별 색 점·선택·길찾기), 고객사·근무자 PPT에 현장 피규어 사진·근무 영상(PPT 재생) 반영, Supabase 프로그램별 권한 SQL 적용, 사용자·제작자 매뉴얼(Word·PPT)
 - **v1.2.0** (2026-11-14) — 새 앱 아이콘(민원/불만처리 · 고객의 소리 VOC), ⑤ 근무자 조치 문서(Word·PPT·PDF) 별도 출력, 고객사 대응 PPT·PDF 디자인 개선(밝은 바탕·포인트 컬러), 출력 기록 삭제 관리(한 건·선택·전체), 통합 로그인 프로그램별 권한(🔐 탭, server/supabase_app_access.sql)

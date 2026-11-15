@@ -27,6 +27,6 @@ html=html.replace('/*ASSETS*/','const ASSET='+json.dumps(assets)+';')
 html=html.replace('/*HF*/',scr(open(R+'src/hf.js',encoding='utf-8').read()))
 html=html.replace('/*KB*/',scr(open(R+'src/kb.js',encoding='utf-8').read()))
 html=html.replace('/*APP*/',scr(open(R+'src/app.js',encoding='utf-8').read()))
-out=sys.argv[1] if len(sys.argv)>1 else R+'dist/S-Tec-Complaint-Response-System_v1.4.0.html'
+out=sys.argv[1] if len(sys.argv)>1 else R+'dist/S-Tec-Complaint-Response-System_v1.4.1.html'
 import os; os.makedirs(os.path.dirname(out),exist_ok=True)
 open(out,'w',encoding='utf-8').write(html); print(out, len(html)//1024,'KB')

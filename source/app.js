@@ -1,12 +1,12 @@
 /* =====================================================================
- * S-Tec Complaint Response System v1.4.0 — 앱 로직
+ * S-Tec Complaint Response System v1.4.1 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.4.0',
+  version: 'v1.4.1',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
@@ -346,6 +346,25 @@ async function makeDocx(p) {
 
   return await packDocx(ch, docTitle(p));
 }
+/* Office 파일 정리: 폴더 항목 제거(OneDrive·클라우드 폴더에서 열기 오류 방지), [Content_Types] 맨 앞,
+   PPT 슬라이드 도형 ID 중복 제거(영상 슬라이드 복구 오류 방지) + 영상 재생 타이밍 */
+async function ooxmlPack(zip, mime, pptx) {
+  const out = new JSZip(), names = Object.keys(zip.files).filter(n => !zip.files[n].dir);
+  names.sort((a, b) => (a === '[Content_Types].xml' ? -1 : b === '[Content_Types].xml' ? 1 : a.startsWith('_rels/') ? -1 : b.startsWith('_rels/') ? 1 : 0));
+  for (const n of names) {
+    if (pptx && /^ppt\/slides\/slide\d+\.xml$/.test(n)) {
+      let x = await zip.file(n).async('string'), id = 0; const vids = [];
+      x = x.replace(/<p:cNvPr id="\d+"([^>]*)>(<a:hlinkClick r:id="" action="ppaction:\/\/media"\/>)?/g, (m, rest, media) => { id++; if (media) vids.push(id); return `<p:cNvPr id="${id}"${rest}>${media || ''}`; });
+      if (vids.length && !x.includes('<p:timing>')) {
+        let t = 2; const nodes = vids.map(v => `<p:video><p:cMediaNode vol="80000"><p:cTn id="${t++}" fill="hold" display="0"><p:stCondLst><p:cond delay="indefinite"/></p:stCondLst></p:cTn><p:tgtEl><p:spTgt spid="${v}"/></p:tgtEl></p:cMediaNode></p:video>`).join('');
+        const tm = `<p:timing><p:tnLst><p:par><p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot"><p:childTnLst>${nodes}</p:childTnLst></p:cTn></p:par></p:tnLst></p:timing>`;
+        x = x.replace(/(<\/p:clrMapOvr>|<\/p:cSld>)(?![\s\S]*<\/p:clrMapOvr>)/, '$1' + tm);
+      }
+      out.file(n, x, { createFolders: false });
+    } else out.file(n, await zip.file(n).async('uint8array'), { createFolders: false });
+  }
+  return await out.generateAsync({ type: 'blob', mimeType: mime, compression: 'DEFLATE' });
+}
 async function packDocx(ch, title) {
   const doc = new docx.Document({
     creator: APP.maker, title, description: `${APP.name} ${APP.version}`,
@@ -385,7 +404,7 @@ async function applyHeaderFooter(blob) {
   });
   if (!/xmlns:r=/.test(d.slice(0, 2000))) d = d.replace('<w:document ', '<w:document xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
   zip.file('word/document.xml', d);
-  return await zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', compression: 'DEFLATE' });
+  return await ooxmlPack(zip, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 }
 
 /* =====================================================================
@@ -513,7 +532,7 @@ function coverSlide(o) {
   c.push(Rc(7.75, 0, 0.04, SH, K.line));
   if (o.fig) c.push(figBox(o.fig, 8.1, 0.55, 4.95, 5.55)); else c.push(Im(8.45, 0.95, 4.2, 4.2 * (o.ratio || 1046 / 1024), o.img || ASSET.cube));
   c.push(Rc(0, 0, 0.12, SH, K.ink)); c.push(Rc(0.12, 0, 0.05, SH, C.green));
-  c.push(Im(0.85, 0.75, 2.1, 2.1 * 340 / 900, ASSET.logo));
+  c.push(Im(0.85, 0.55, 1.55, 1.55, ASSET.voc));  /* 표지 로고 = 앱 아이콘 */
   c.push(Rc(0.85, 2.55, 0.5, 0.05, C.green));
   c.push(T(0.85, 2.7, 6.6, 0.4, o.eyebrow, { pt: 13, color: C.green, bold: true }));
   c.push(T(0.85, 3.1, 6.7, 1.25, [{ text: o.title, bold: true }], { max: 36, min: 24, color: K.ink, lh: 1.15 }));
@@ -787,7 +806,7 @@ async function makePptx(p, slidesIn, titleIn) {
       }
     });
   });
-  return await pptx.write({ outputType: 'blob' });
+  return await ooxmlPack(await JSZip.loadAsync(await pptx.write({ outputType: 'blob' })), 'application/vnd.openxmlformats-officedocument.presentationml.presentation', true);
 }
 
 /* ---------- PDF 렌더 (같은 슬라이드 모델 → HTML → 이미지 → PDF) ---------- */

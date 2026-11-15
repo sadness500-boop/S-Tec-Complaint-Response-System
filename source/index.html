@@ -41,8 +41,8 @@ button{font-family:inherit;cursor:pointer}
 /* 트리 */
 .search{width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--ink);font-family:inherit;margin-bottom:10px}
 #tree{max-height:46vh;overflow:auto;padding-right:4px}
-details.big{border:1px solid var(--line);border-radius:10px;margin-bottom:7px;background:var(--card)}
-details.big>summary{padding:9px 11px;font-weight:700;cursor:pointer;list-style:none;display:flex;gap:6px;align-items:center;border-left:5px solid var(--navy);border-radius:10px}
+details.big{border:1px solid var(--line);border-radius:10px;margin-bottom:4px;background:var(--card)}
+details.big>summary{padding:6px 10px;font-size:14px;font-weight:700;cursor:pointer;list-style:none;display:flex;gap:6px;align-items:center;border-left:5px solid var(--navy);border-radius:10px}
 details.big[open]>summary{background:var(--soft);border-left-color:var(--green)}
 details.big>summary .ic{font-size:15px}
 details.mid{margin:4px 8px 6px 14px}
@@ -266,7 +266,7 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
 .kpin i{display:block;width:12px;height:12px;border-radius:50%;background:var(--c);border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.45)}
 .kpin.on i{width:18px;height:18px;border-width:3px;box-shadow:0 0 0 4px rgba(30,139,58,.35),0 2px 6px rgba(0,0,0,.4)}
 .kpin span{background:#0b1757;color:#fff;font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.3)}
-#siteList{max-height:26vh}
+#siteList{max-height:16vh}#mapCard .smap-h{margin-top:0}
 /* 바닥 */
 .foot{position:fixed;left:0;right:0;bottom:0;background:var(--navyD);color:#C9D1F0;font-size:11.5px;z-index:15;border-top:3px solid var(--green)}
 .foot .in{max-width:1680px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:6px 22px}
@@ -327,13 +327,10 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
       <input class="search" id="sq" placeholder="🔍 사업장명·주소·업종 검색">
       <ul id="siteList"></ul>
       <button class="btn l" id="siteManual" type="button">✎ 목록에 없는 사업장 직접 입력</button>
-      <div class="smap-h">🗺 사업장 위치 <small>카카오맵 · 지사별 색</small><span class="lg"><i style="--c:#1E8B3A"></i>동부<i style="--c:#0B1F8F"></i>서부<i style="--c:#C2410C"></i>남부<i style="--c:#6D28D9"></i>중부</span></div>
-      <div id="siteMap" class="smap nomap"></div>
-      <div class="smap-cap" id="mapCap"></div>
     </div>
   </section>
   <!-- ② 분류 -->
-  <section class="card">
+  <section class="card" id="treeCard">
     <h2><span class="stepn">2</span> Complaint 분류 <span class="r">대 · 중 · 소</span></h2>
     <div class="body">
       <input class="search" id="q" placeholder="🔍 항목·키워드 검색 (예: 화재경보, 유튜브, 교체)">
@@ -341,6 +338,14 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
       <ul class="principle">
         <li><b style="color:#C62828">중대</b> 즉시 경영 보고 · <b style="color:#EF6C00">주요</b> 7일 내 종결 · <b style="color:#2E7D32">일반</b> 현장 개선</li>
       </ul>
+    </div>
+  </section>
+  <!-- 사업장 위치 (카카오맵) -->
+  <section class="card" id="mapCard">
+    <div class="body">
+      <div class="smap-h">🗺 사업장 위치 <small>카카오맵 · 지사별 색</small><span class="lg"><i style="--c:#1E8B3A"></i>동부<i style="--c:#0B1F8F"></i>서부<i style="--c:#C2410C"></i>남부<i style="--c:#6D28D9"></i>중부</span></div>
+      <div id="siteMap" class="smap nomap"></div>
+      <div class="smap-cap" id="mapCap"></div>
     </div>
   </section>
   </div>

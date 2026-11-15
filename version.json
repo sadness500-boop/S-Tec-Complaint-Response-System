@@ -1,7 +1,7 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "date": "2026-11-15",
-  "note": "메인 화면 고객 불만 유발 사례 영상 4편 자동 재생(모자이크 전환)",
-  "html": "releases/S-Tec-Complaint-Response-System_v1.4.0.html",
-  "apk": "releases/S-Tec-Complaint-Response-System_v1.4.0.apk"
+  "note": "PPT가 PowerPoint에서 열리지 않던 문제 수정, ② Complaint 분류 첫 화면 배치, 출력물 표지 로고를 앱 아이콘으로",
+  "html": "releases/S-Tec-Complaint-Response-System_v1.4.1.html",
+  "apk": "releases/S-Tec-Complaint-Response-System_v1.4.1.apk"
 }

@@ -197,7 +197,7 @@ function uiInit() {
   ['f_author', 'f_dept'].forEach(id => $('#' + id).addEventListener('input', e => e.target.dataset.touched = '1'));
   $('#mgrCard').onclick = openMgr; $('#qrCard').onclick = openQR; $('#refCard').onclick = openRef;
   document.querySelectorAll('[data-theme-set]').forEach(b => b.onclick = () => applyTheme(b.dataset.themeSet));
-  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap(); initVidStage();
+  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap(); initVidStage(); fitTree(); setTimeout(fitTree, 400); addEventListener('resize', fitTree);
 }
 
 /* =====================================================================
@@ -314,4 +314,12 @@ function vGo(next) {
     else { cv.classList.remove('on'); $('#vBot').classList.remove('fade'); oldV.pause(); VST.busy = false; }
   };
   requestAnimationFrame(step);
+}
+
+/* ② Complaint 분류가 첫 화면 안에 보이도록 — 트리 높이를 화면 아래 끝에 맞춤 */
+function fitTree() {
+  const t = document.getElementById('tree'); if (!t) return;
+  if (innerWidth <= 820) { t.style.maxHeight = ''; return; }
+  const top = t.getBoundingClientRect().top + scrollY, foot = (document.querySelector('.foot') || {}).offsetHeight || 0;
+  t.style.maxHeight = Math.max(140, Math.round(innerHeight - top - 66 - (getComputedStyle(document.querySelector('.foot') || document.body).position === 'fixed' ? foot : 0))) + 'px';
 }
