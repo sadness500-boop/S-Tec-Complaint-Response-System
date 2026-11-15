@@ -1,12 +1,12 @@
 /* =====================================================================
- * S-Tec Complaint Response System v1.4.1 — 앱 로직
+ * S-Tec Complaint Response System v1.5.0 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.4.1',
+  version: 'v1.5.0',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
@@ -341,6 +341,7 @@ async function makeDocx(p) {
   ch.push(H1(`${roman[n++]}. 고객사 회신(안)`));
   ch.push(boxPara(lines(p.reply).map(l => P([R(l, { size: 20 })], { after: 60, line: 300 })).concat([P([R(`${f.dept} 드림`, { size: 20, bold: true })], { align: docx.AlignmentType.RIGHT, before: 60, after: 0 })]), 'FFFFFF', C.navy));
   ch.push(...imgPara(ASSET.fig.team, 2.3, 'The Best Choice, S-Tec — 에스텍 그룹이 약속드립니다', ASSET.figDim.team));
+  attachDocx(ch);
   ch.push(P([R('- 끝 -', { size: 20, bold: true })], { align: docx.AlignmentType.CENTER, before: 200, after: 120 }));
   ch.push(P([R(`※ 법령 요약은 실무 참고용입니다. 적용 전 국가법령정보센터(law.go.kr) 원문 및 노무 자문으로 확인하십시오.  |  ${APP.name} ${APP.version}`, { size: 15, color: '8A93A3' })], { align: docx.AlignmentType.CENTER }));
 
@@ -364,6 +365,31 @@ async function ooxmlPack(zip, mime, pptx) {
     } else out.file(n, await zip.file(n).async('uint8array'), { createFolders: false });
   }
   return await out.generateAsync({ type: 'blob', mimeType: mime, compression: 'DEFLATE' });
+}
+/* 붙임: 고객사 접수 원문(공문·메일·카톡·사진) — 📎 불러오기로 올린 파일 */
+function attachDocx(ch) {
+  const att = typeof intakeAtt === 'function' ? intakeAtt() : []; if (!att.length) return;
+  ch.push(H1('붙임. 고객사 접수 원문'));
+  ch.push(P([R(att.map((a, k) => `${k + 1}. ${a.name} (${a.kind})`).join('   '), { size: 18, color: C.gray })], { after: 60 }));
+  att.forEach((a, k) => {
+    ch.push(H2(`${k + 1}. ${a.name}`));
+    a.imgs.slice(0, 3).forEach((im, j) => ch.push(...imgPara(im.src, Math.min(6.0, 5.2 * im.w / im.h), a.imgs.length > 1 ? `${a.name} — ${j + 1}` : null, [im.w, im.h])));
+    if (!a.imgs.length && a.text) ch.push(boxPara(a.text.slice(0, 3000).split('\n').filter(l => l.trim()).map(l => P([R(l, { size: 18 })], { after: 20 })), 'FFFFFF', C.silver));
+  });
+}
+function attachSlides(S, no, p) {
+  const att = typeof intakeAtt === 'function' ? intakeAtt() : [], ims = [];
+  att.forEach(a => { if (a.imgs.length) a.imgs.slice(0, 2).forEach(im => ims.push({ a, im })); else if (a.text) ims.push({ a, txt: a.text }); });
+  for (let i = 0; i < Math.min(ims.length, 4); i += 2) {
+    const pair = ims.slice(i, i + 2), o = frame('붙임  고객사 접수 원문', pair.map(x => x.a.name).join(' · '), no++, p), cw = pair.length > 1 ? 5.95 : 12.1;
+    pair.forEach((x, j) => {
+      const X = 0.6 + j * 6.15, Y = 1.55, H = 4.95;
+      if (x.im) { const r = Math.min(cw / x.im.w, (H - 0.35) / x.im.h), w = x.im.w * r, h = x.im.h * r, xx = X + (cw - w) / 2; o.push(Rc(xx - 0.03, Y - 0.03, w + 0.06, h + 0.06, K.line)); o.push(Im(xx, Y, w, h, x.im.src)); o.push(T(X, Y + h + 0.06, cw, 0.3, `▲ ${x.a.kind} · ${x.a.name}`, { pt: 10, color: K.mute, align: 'center' })); }
+      else { o.push(Rc(X, Y, cw, H, K.tint, { line: K.line })); o.push(T(X + 0.2, Y + 0.12, cw - 0.4, H - 0.24, x.txt.slice(0, 900).split('\n').filter(Boolean).map(t => ({ text: t })), { max: 12, min: 7.5, color: '2A3150', lh: 1.25 })); }
+    });
+    S.push(o);
+  }
+  return no;
 }
 async function packDocx(ch, title) {
   const doc = new docx.Document({
@@ -778,6 +804,7 @@ function buildSlides(p) {
   }
   S.push(o10); no++;
 
+  no = attachSlides(S, no, p);
   /* 11. 맺음 */
   S.push(closingSlide({ fig: 'team', tag: '고객의 목소리를 구조로 개선합니다 — 재발 없는 현장을 약속드립니다.', org: `${APP.org}  ·  ${f.dept}` }));
   return S;
@@ -872,7 +899,7 @@ async function run(kind) {
 function saveHistory(p) {
   try {
     const h = readHist();
-    const f2 = Object.assign({}, p.f); delete f2.siteObj;
+    const f2 = Object.assign({}, p.f); delete f2.siteObj; delete f2.att;
     h.unshift({ at: fmtD(kstNow()), client: p.f.client, names: p.names, f: f2, siteId: p.site ? p.site.id : null, picked: p.items.map(x => x.S.c) });
     storeHistory(h.slice(0, 20)); renderHistory();
   } catch (e) { }

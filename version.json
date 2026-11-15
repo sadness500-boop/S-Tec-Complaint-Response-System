@@ -1,7 +1,7 @@
 {
-  "version": "1.4.1",
+  "version": "1.5.0",
   "date": "2026-11-15",
-  "note": "PPT가 PowerPoint에서 열리지 않던 문제 수정, ② Complaint 분류 첫 화면 배치, 출력물 표지 로고를 앱 아이콘으로",
-  "html": "releases/S-Tec-Complaint-Response-System_v1.4.1.html",
-  "apk": "releases/S-Tec-Complaint-Response-System_v1.4.1.apk"
+  "note": "공문·메일·카톡·사진으로 받은 Complaint 불러오기(자동 입력·원문 붙임)",
+  "html": "releases/S-Tec-Complaint-Response-System_v1.5.0.html",
+  "apk": "releases/S-Tec-Complaint-Response-System_v1.5.0.apk"
 }

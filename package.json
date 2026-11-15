@@ -1,10 +1,10 @@
 {
   "name": "s-tec-complaint-response-system",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "private": true,
   "description": "에스텍 그룹 고객사 Complaint 대응 프로그램 — 안드로이드 앱 포장(Capacitor). Produced by RatRae Choi",
   "scripts": {
-    "www": "rm -rf www && mkdir -p www && cp index.html manifest.webmanifest www/ && cp -r icons media www/"
+    "www": "rm -rf www && mkdir -p www && cp index.html manifest.webmanifest www/ && cp -r icons media lib www/"
   },
   "dependencies": {
     "@capacitor/android": "6.2.0",

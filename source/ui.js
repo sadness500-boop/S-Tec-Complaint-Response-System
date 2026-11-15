@@ -197,7 +197,7 @@ function uiInit() {
   ['f_author', 'f_dept'].forEach(id => $('#' + id).addEventListener('input', e => e.target.dataset.touched = '1'));
   $('#mgrCard').onclick = openMgr; $('#qrCard').onclick = openQR; $('#refCard').onclick = openRef;
   document.querySelectorAll('[data-theme-set]').forEach(b => b.onclick = () => applyTheme(b.dataset.themeSet));
-  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap(); initVidStage(); fitTree(); setTimeout(fitTree, 400); addEventListener('resize', fitTree);
+  applyTheme(UI.theme); renderHeader(); renderSites(); renderSiteInfo(); applyManager(); showGate(); initMap(); initVidStage(); initIntake(); fitTree(); setTimeout(fitTree, 400); addEventListener('resize', fitTree);
 }
 
 /* =====================================================================
