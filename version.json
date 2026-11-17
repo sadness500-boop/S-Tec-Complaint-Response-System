@@ -1,7 +1,7 @@
 {
-  "version": "1.5.2",
-  "date": "2026-11-16",
-  "note": "메인 화면 사례 영상 8편(출근 지각·교대 시간 미준수 추가)",
-  "html": "releases/S-Tec-Complaint-Response-System_v1.5.2.html",
-  "apk": "releases/S-Tec-Complaint-Response-System_v1.5.2.apk"
+  "version": "1.5.3",
+  "date": "2026-11-18",
+  "note": "관리자 페이지 「관리 범위」: 서버 공유 조직·사업장 목록 불러오기",
+  "html": "releases/S-Tec-Complaint-Response-System_v1.5.3.html",
+  "apk": "releases/S-Tec-Complaint-Response-System_v1.5.3.apk"
 }

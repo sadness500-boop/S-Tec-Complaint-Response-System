@@ -4224,14 +4224,14 @@ function initIntake() {
 }
 </script>
 <script>/* =====================================================================
- * S-Tec Complaint Response System v1.5.2 — 앱 로직
+ * S-Tec Complaint Response System v1.5.3 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.5.2',
+  version: 'v1.5.3',
   build: '2026-11-14',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
@@ -6419,8 +6419,42 @@ function drawUsers(){
   });
 }
 /* v2.15 관리 범위 지정 — 회사 · 지사(조직) · 사업장 단위 */
-function scopeEditor(u){
-  const D = (typeof S!=='undefined' && S) ? S : {orgs:[],sites:[]};
+/* (v1.3.2) 조직·사업장 목록 — 이 프로그램에는 근태 자료(S)가 없으므로
+   근태관리 프로그램이 서버에 올려 둔 공유 조직·사업장 목록을 불러와 씀 (불러온 목록은 이 기기에 보관) */
+const LSO = PFX+'_org_cache';
+function localOrgData(){
+  try{ if(typeof S!=='undefined' && S && ((S.orgs||[]).length || (S.sites||[]).length)) return {orgs:S.orgs||[], sites:S.sites||[]}; }catch(e){}
+  const b=shb().base; if(b && b.v && ((b.v.orgs||[]).length)) return {orgs:b.v.orgs||[], sites:[]};
+  return null; }
+async function fetchOrgData(){
+  const r=await SB.rpc('shared_pull'); if(r.error) throw r.error;
+  const items=(r.data&&r.data.items)||[], base=(items.find(i=>i.k==='base')||{}).v||{};
+  const order=base.siteOrder||[];
+  const sites=items.filter(i=>(i.k||'').startsWith('site:') && i.v && i.v.site).map(i=>i.v.site)
+    .sort((a,b)=>{ const ia=order.indexOf(a.id), ib=order.indexOf(b.id); return (ia<0?1e9:ia)-(ib<0?1e9:ib); });
+  const D={orgs:base.orgs||[], sites, at:new Date().toISOString()};
+  if(D.orgs.length || D.sites.length){ try{ localStorage.setItem(LSO, JSON.stringify(D)); }catch(e){} }
+  return D; }
+async function scopeEditor(u){
+  let D=localOrgData();
+  if(!D){
+    pop(`<h2>관리 범위</h2><p class="ag-sub">조직·사업장 목록을 서버에서 불러오는 중입니다…</p>`);
+    let err=null;
+    try{ D=await fetchOrgData(); }catch(e){ err=e; }
+    if(!D || (!(D.orgs||[]).length && !(D.sites||[]).length)){
+      const c=jget(LSO);
+      if(c && ((c.orgs||[]).length || (c.sites||[]).length)){ D=c; tip(`서버 연결이 안 되어 이 기기에 보관한 목록(${String(c.at||'').slice(0,10)})을 씁니다`); }
+      else{
+        pop(`<h2>관리 범위</h2><p class="ag-sub">조직·사업장 목록을 불러오지 못했습니다.<br>${err?`서버 응답: ${E(err.message||String(err))}<br>`:'서버에 등록된 조직·사업장이 없습니다.<br>'}
+          조직·사업장은 <b>근태관리 프로그램(Attendance Management Software)</b>에 등록되어 서버에 공유된 목록을 씁니다. 근태관리 프로그램에서 조직·사업장을 등록하고 동기화한 뒤 다시 여세요.</p>
+          <button class="ag-btn" id="scRe">다시 불러오기</button><button class="ag-btn sec" id="scX">닫기</button>`);
+        g('scX').onclick=closePop; g('scRe').onclick=()=>scopeEditor(u); return;
+      }
+    }
+  }
+  return scopeEditorDraw(u, D);
+}
+function scopeEditorDraw(u, D){
   const orgs=D.orgs||[], sites=D.sites||[], me=PROFILE;
   const kids=id=>orgs.filter(o=>(o.parent||'')===(id||''));
   const tree=[]; const walk=(id,dep)=>kids(id).forEach(o=>{ tree.push({o,dep}); walk(o.id,dep+1); }); walk('',0);
@@ -6487,7 +6521,6 @@ function scopeEditor(u){
       closePop(); await upd(u,'scope',JSON.stringify(sc),`${u.name||u.email} 님의 관리 범위: ${scopeLabel(sc)}`);
     };
   };
-  if(!orgs.length && !sites.length){ pop(`<h2>관리 범위</h2><p class="ag-sub">이 기기에 조직·사업장 자료가 없습니다. 제작자 기기에서 지정하세요.</p><button class="ag-btn sec" id="scX">닫기</button>`); g('scX').onclick=closePop; return; }
   draw();
 }
 async function upd(u,action,value,okMsg){
