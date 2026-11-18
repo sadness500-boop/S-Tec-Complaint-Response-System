@@ -2,7 +2,7 @@
 
 <img src="icons/icon-192.png" width="96" alt="S-Tec Complaint 아이콘">
 
-**에스텍 그룹 고객사 Complaint 대응 프로그램** · v1.5.5
+**에스텍 그룹 고객사 Complaint 대응 프로그램** · v1.5.6
 
 고객사가 제기한 Complaint를 **① 발생 사업장 선정 → ② 대·중·소 분류 → ③ 내용 작성 → ④ 출력** 순서로 처리하면,
 대응방안을 **Word(머리글·바닥글 서식) · PPT(16:9) · PDF(PPT와 같은 디자인)** 3종으로 바로 만들어 줍니다. 웹 버전과 안드로이드 앱(APK)으로 씁니다.
@@ -12,9 +12,9 @@
 | 구분 | 파일 | 주소 |
 |---|---|---|
 | 웹 버전 | [index.html](index.html) | https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/ |
-| 웹 버전 (버전별) | [releases/S-Tec-Complaint-Response-System_v1.5.5.html](releases/S-Tec-Complaint-Response-System_v1.5.5.html) | |
+| 웹 버전 (버전별) | [releases/S-Tec-Complaint-Response-System_v1.5.6.html](releases/S-Tec-Complaint-Response-System_v1.5.6.html) | |
 | 안드로이드 앱 (최신) | `stcr-latest.apk` | https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk |
-| 안드로이드 앱 (버전별) | `releases/S-Tec-Complaint-Response-System_v1.5.5.apk` | 릴리스 `v1.5.5` |
+| 안드로이드 앱 (버전별) | `releases/S-Tec-Complaint-Response-System_v1.5.6.apk` | 릴리스 `v1.5.6` |
 
 - **APK는 GitHub Actions가 만듭니다.** `index.html` 또는 `version.json`을 올리면 Actions 탭의 "Android APK"가 실행되어 약 5분 뒤 `releases/` 폴더와 릴리스에 버전 이름이 붙은 APK가 올라갑니다. Actions 탭 › Android APK › Run workflow 로 직접 실행할 수도 있습니다.
 - **안드로이드 설치:** APK 내려받기 → "출처를 알 수 없는 앱 설치 허용" → 설치. Play 프로텍트 경고가 뜨면 "무시하고 설치".
@@ -76,6 +76,7 @@ package.json · capacitor.config.json · android-keystore/   안드로이드 앱
 
 ## 변경 이력
 
+- **v1.5.6** (2026-11-18) — 메인 화면 사례 영상 12편: 「물류창고 지게차 부주의 운전·적재물 충돌」(물류) 추가, 끝부분 보안 영상 사이에 배치
 - **v1.5.5** (2026-11-18) — 메인 화면 사례 영상 「상황실 근무 중 휴대폰 게임」·「상황실 근무 중 음주」를 고화질(HD) 영상으로 교체
 - **v1.5.4** (2026-11-18) — 메인 화면 사례 영상 11편: 상황실 휴대폰 게임·행사장 공연 관람·과격한 관중 통제·상황실 음주 추가, 같은 장소·직종이 이어지지 않도록 재배치
 - **v1.5.3** (2026-11-18) — 관리자 페이지 「관리 범위」에서 「이 기기에 조직·사업장 자료가 없습니다」로 지정이 안 되던 문제 수정: 근태관리 프로그램이 서버에 공유한 조직·사업장 목록을 불러와 지정(불러온 목록은 기기에 보관, 서버 연결이 안 되면 보관 목록 사용) — 업무표준화 프로그램 v1.3.2와 같은 방식
