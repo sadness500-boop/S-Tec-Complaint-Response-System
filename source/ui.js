@@ -138,7 +138,7 @@ function showGate() {
 }
 
 /* =====================================================================
- * ① 발생 사업장 선정 — 에스텍베스트 사업장 목록(151곳)
+ * ① 발생 사업장 선정 — 에스텍 그룹 사업장 목록
  * ===================================================================== */
 function siteMatches(st, q) { return !q || (st.name + ' ' + st.addr + ' ' + st.work + ' ' + st.type + ' ' + (st.mgr || '')).toLowerCase().includes(q); }
 function renderSites() {
