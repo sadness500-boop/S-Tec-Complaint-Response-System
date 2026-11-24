@@ -329,5 +329,5 @@ function fitTree() {
   const t = document.getElementById('tree'); if (!t) return;
   if (innerWidth <= 820) { t.style.maxHeight = ''; return; }
   const top = t.getBoundingClientRect().top + scrollY, foot = (document.querySelector('.foot') || {}).offsetHeight || 0;
-  t.style.maxHeight = Math.max(140, Math.round(innerHeight - top - 66 - (getComputedStyle(document.querySelector('.foot') || document.body).position === 'fixed' ? foot : 0))) + 'px';
+  t.style.maxHeight = Math.max(360, Math.round(innerHeight - top - 66 - (getComputedStyle(document.querySelector('.foot') || document.body).position === 'fixed' ? foot : 0))) + 'px';
 }

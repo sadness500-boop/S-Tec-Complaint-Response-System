@@ -61,6 +61,10 @@ li.sm .nm{flex:1}li.sm em{font-style:normal;font-size:10.5px;color:var(--gray)}
 /* 폼 */
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
 .grid .full{grid-column:1/-1}
+.out{display:flex;flex-direction:column;gap:16px;min-width:0}
+.treebox{border:1px solid var(--line,#d5dbe8);border-radius:14px;padding:12px 14px;margin:0 0 14px;background:rgba(127,127,127,.04)}
+.treebox .tb-h{display:flex;align-items:center;gap:8px;font-size:15px;margin:0 0 10px}.treebox .tb-h .r{margin-left:auto;font-size:11px;font-weight:400;opacity:.7}
+.treebox #tree{max-height:60vh}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:var(--gray)}
 label.f b{color:var(--brick)}
 input[type=text],input[type=date],select,textarea{font-family:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--ink);width:100%}
@@ -347,17 +351,6 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
       <button class="btn l" id="siteManual" type="button">✎ 목록에 없는 사업장 직접 입력</button>
     </div>
   </section>
-  <!-- ② 분류 -->
-  <section class="card" id="treeCard">
-    <h2><span class="stepn">2</span> Complaint 분류 <span class="r">대 · 중 · 소</span></h2>
-    <div class="body">
-      <input class="search" id="q" placeholder="🔍 항목·키워드 검색 (예: 화재경보, 유튜브, 교체)">
-      <div id="tree"></div>
-      <ul class="principle">
-        <li><b style="color:#C62828">중대</b> 즉시 경영 보고 · <b style="color:#EF6C00">주요</b> 7일 내 종결 · <b style="color:#2E7D32">일반</b> 현장 개선</li>
-      </ul>
-    </div>
-  </section>
   <!-- 사업장 위치 (카카오맵) -->
   <section class="card" id="mapCard">
     <div class="body">
@@ -381,15 +374,16 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
         <div class="in-files" id="inFiles"></div>
       </div>
       <div class="siteinfo empty" id="siteInfo"></div>
+      <!-- ② 분류 (v1.5.8 — 가운데 넓은 칸으로 옮김) -->
+      <div class="treebox" id="treeCard">
+        <h3 class="tb-h"><span class="stepn">2</span> Complaint 분류 <span class="r">대 · 중 · 소</span></h3>
+        <input class="search" id="q" placeholder="🔍 항목·키워드 검색 (예: 화재경보, 유튜브, 교체)">
+        <div id="tree"></div>
+        <ul class="principle">
+          <li><b style="color:#C62828">중대</b> 즉시 경영 보고 · <b style="color:#EF6C00">주요</b> 7일 내 종결 · <b style="color:#2E7D32">일반</b> 현장 개선</li>
+        </ul>
+      </div>
       <div class="grid">
-        <label class="f"><span>고객사명(사업장) <b>*</b></span><input type="text" id="f_client" placeholder="① 사업장 선택 시 자동 입력"></label>
-        <label class="f"><span>발생 장소(세부)</span><input type="text" id="f_site" placeholder="예: 정문 초소, 2층 화장실"></label>
-        <label class="f"><span>업종</span><input type="text" id="f_job" list="jobList" placeholder="사업장 선택 시 자동 입력"><datalist id="jobList"></datalist></label>
-        <label class="f"><span>접수 경로</span><select id="f_channel"><option>공문</option><option>이메일</option><option>유선</option><option>대면</option><option>메신저</option><option>기타</option></select></label>
-        <label class="f"><span>접수일</span><input type="date" id="f_date"></label>
-        <label class="f"><span>발생 일시</span><input type="text" id="f_occur" placeholder="예: 11/12(목) 02:10경"></label>
-        <label class="f"><span>제기자(소속·직책)</span><input type="text" id="f_raiser" placeholder="예: 총무팀 이사"></label>
-        <label class="f"><span>관련 근무자</span><input type="text" id="f_workers" placeholder="예: 야간 경비원 1명"></label>
         <div class="full">
           <label class="f" style="margin-bottom:4px">선택된 Complaint 항목 (최대 5개)</label>
           <div class="pickbox" id="picked"></div>
@@ -425,6 +419,20 @@ body.dark .smap.nomap{background:linear-gradient(160deg,#1a2240,#141b31)}
         <button class="btn all" id="btnAll">⬇ 3종 일괄 출력 (Word + PPT + PDF)</button>
       </div>
       <div id="workerBox"></div>
+    </div>
+    <!-- 사업장 · 접수 정보 (v1.5.8 — 영상 아래로 옮김) -->
+    <div class="card" id="caseCard">
+      <h2><span class="stepn">3</span> 사업장 · 접수 정보 <span class="r">접수일 · 담당 · 관련 근무자</span></h2>
+      <div class="body"><div class="grid">
+        <label class="f"><span>고객사명(사업장) <b>*</b></span><input type="text" id="f_client" placeholder="① 사업장 선택 시 자동 입력"></label>
+        <label class="f"><span>발생 장소(세부)</span><input type="text" id="f_site" placeholder="예: 정문 초소, 2층 화장실"></label>
+        <label class="f"><span>업종</span><input type="text" id="f_job" list="jobList" placeholder="사업장 선택 시 자동 입력"><datalist id="jobList"></datalist></label>
+        <label class="f"><span>접수 경로</span><select id="f_channel"><option>공문</option><option>이메일</option><option>유선</option><option>대면</option><option>메신저</option><option>기타</option></select></label>
+        <label class="f"><span>접수일</span><input type="date" id="f_date"></label>
+        <label class="f"><span>발생 일시</span><input type="text" id="f_occur" placeholder="예: 11/12(목) 02:10경"></label>
+        <label class="f"><span>제기자(소속·직책)</span><input type="text" id="f_raiser" placeholder="예: 총무팀 이사"></label>
+        <label class="f"><span>관련 근무자</span><input type="text" id="f_workers" placeholder="예: 야간 경비원 1명"></label>
+      </div></div>
     </div>
   </section>
 </main>
@@ -3960,7 +3968,7 @@ function fitTree() {
   const t = document.getElementById('tree'); if (!t) return;
   if (innerWidth <= 820) { t.style.maxHeight = ''; return; }
   const top = t.getBoundingClientRect().top + scrollY, foot = (document.querySelector('.foot') || {}).offsetHeight || 0;
-  t.style.maxHeight = Math.max(140, Math.round(innerHeight - top - 66 - (getComputedStyle(document.querySelector('.foot') || document.body).position === 'fixed' ? foot : 0))) + 'px';
+  t.style.maxHeight = Math.max(360, Math.round(innerHeight - top - 66 - (getComputedStyle(document.querySelector('.foot') || document.body).position === 'fixed' ? foot : 0))) + 'px';
 }
 
 /* =====================================================================
@@ -4232,15 +4240,15 @@ function initIntake() {
 }
 </script>
 <script>/* =====================================================================
- * S-Tec Complaint Response System v1.5.7 — 앱 로직
+ * S-Tec Complaint Response System v1.5.8 — 앱 로직
  * 에스텍 그룹 고객사 Complaint 대응 프로그램
  * Program & Design by Rat Rae Choi (제작자 서명 — 하드코딩)
  * ===================================================================== */
 const APP = {
   name: 'S-Tec Complaint Response System',
   ko: '고객사 Complaint 대응 프로그램',
-  version: 'v1.5.7',
-  build: '2026-11-14',
+  version: 'v1.5.8',
+  build: '2026-11-25',
   shareUrl: 'https://sadness500-boop.github.io/S-Tec-Complaint-Response-System/',
   apkUrl: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System/releases/download/app-latest/stcr-latest.apk',
   repo: 'https://github.com/sadness500-boop/S-Tec-Complaint-Response-System',
@@ -7432,5 +7440,50 @@ html body :is(input,select,textarea)::placeholder{letter-spacing:0}`;
   var first = function () { apply(); setTimeout(function () { try { dispatchEvent(new Event('resize')); } catch (e) { } }, 400); };   /* 지도 크기 다시 맞추기 */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(first, 0); }); else setTimeout(first, 0);
 })();</script><!-- STEC-LAYOUT END -->
+<script>
+/* =====================================================================
+ * 🎙 음성으로 입력 — 말한 내용을 글로 바꿔 입력 칸에 이어 붙임 (Web Speech API · 한국어)
+ * 지원하지 않는 기기(일부 앱·PC 프로그램)는 키보드 음성 입력(🎤 / 윈도우 Win+H)을 안내합니다.
+ * Designed & Developed by Rat Rae Choi
+ * ===================================================================== */
+(function () {
+  if (window.STEC_VOICE) return;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const css = `.vc-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(127,127,127,.35);background:rgba(127,127,127,.08);color:inherit;border-radius:999px;padding:4px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;margin-left:8px;vertical-align:middle}
+.vc-btn:hover{background:rgba(127,127,127,.16)}.vc-btn.on{background:#C62828;border-color:#C62828;color:#fff;animation:vcP 1.2s infinite}
+@keyframes vcP{0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,.5)}50%{box-shadow:0 0 0 7px rgba(198,40,40,0)}}
+.vc-live{font-size:12px;color:#C62828;margin:4px 0 0;min-height:0}.vc-live:empty{display:none}
+.vc-tip{font-size:12px;line-height:1.55;margin:6px 0 0;padding:8px 10px;border-radius:10px;background:rgba(240,160,0,.13);border:1px solid rgba(240,160,0,.45)}`;
+  const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
+  const isWin = /Windows/i.test(navigator.userAgent), isMob = /Android|iPhone|iPad/i.test(navigator.userAgent);
+  const kbHint = isMob ? '휴대폰 키보드의 <b>🎤 마이크</b> 버튼을 눌러 말하면 바로 글로 입력됩니다.' : isWin ? '입력 칸을 누른 뒤 <b>윈도우 키 + H</b> 를 누르고 말하면 글로 입력됩니다.' : '키보드의 받아쓰기(음성 입력) 기능을 쓰세요 — 맥은 <b>Fn 두 번</b>.';
+  let cur = null;
+  function tip(box, html) { let t = box.querySelector('.vc-tip'); if (!t) { t = document.createElement('div'); t.className = 'vc-tip'; box.appendChild(t); } t.innerHTML = html; clearTimeout(t._h); t._h = setTimeout(() => t.remove(), 14000); }
+  function attach(ta, opt) {
+    if (!ta || ta.dataset.vc) return; ta.dataset.vc = '1'; opt = opt || {};
+    const lab = opt.label || (ta.closest('label') && ta.closest('label').querySelector('span')) || ta.previousElementSibling;
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'vc-btn'; btn.title = '눌러서 말하면 글로 입력됩니다 (다시 누르면 멈춤)'; btn.innerHTML = '🎙 음성 입력';
+    const live = document.createElement('div'); live.className = 'vc-live';
+    const box = document.createElement('div'); ta.insertAdjacentElement('afterend', box); box.appendChild(live);
+    if (lab) lab.appendChild(btn); else box.prepend(btn);
+    btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); if (cur && cur.ta === ta) return cur.stop(); if (cur) cur.stop(); start(); });
+    function start() {
+      if (!SR) { tip(box, '🎙 이 브라우저·프로그램은 음성 인식을 바로 지원하지 않습니다. ' + kbHint + '<br><small>크롬·엣지 브라우저(인터넷 연결 필요)에서는 이 버튼으로 바로 됩니다.</small>'); ta.focus(); return; }
+      const rec = new SR(); rec.lang = 'ko-KR'; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
+      const base0 = ta.value; let base = base0 && !/\s$/.test(base0) ? base0 + (opt.newline === false ? ' ' : '\n') : base0, fin = '', stopped = false, gotAny = false;
+      const write = itm => { ta.value = base + fin + itm; ta.dispatchEvent(new Event('input', { bubbles: true })); };
+      rec.onresult = ev => { let itm = ''; for (let i = ev.resultIndex; i < ev.results.length; i++) { const r = ev.results[i], t = r[0].transcript; if (r.isFinal) { fin += t.trim() + (opt.newline === false ? ' ' : ' '); gotAny = true; } else itm += t; } write(itm); live.textContent = itm ? '… ' + itm : '🔴 듣는 중 — 말씀하세요 (다시 누르면 멈춤)'; };
+      rec.onerror = ev => { const m = { 'not-allowed': '마이크 사용이 허용되지 않았습니다. 주소창 왼쪽 🔒 › 마이크 「허용」으로 바꿔 주세요.', 'service-not-allowed': '이 기기에서는 음성 인식 서비스를 쓸 수 없습니다. ' + kbHint, 'network': '음성 인식 서버에 연결하지 못했습니다(인터넷 연결 확인). ' + kbHint, 'audio-capture': '마이크를 찾지 못했습니다. 마이크 연결을 확인하세요.', 'no-speech': '' }[ev.error]; if (m) tip(box, '🎙 ' + m); };
+      rec.onend = () => { if (!stopped && cur && cur.rec === rec) { try { rec.start(); return; } catch (e) { } } btn.classList.remove('on'); btn.innerHTML = '🎙 음성 입력'; live.textContent = ''; ta.value = (base + fin).replace(/[ \t]+$/, ''); ta.dispatchEvent(new Event('input', { bubbles: true })); ta.dispatchEvent(new Event('change', { bubbles: true })); if (cur && cur.rec === rec) cur = null; };
+      cur = { ta, rec, stop() { stopped = true; try { rec.stop(); } catch (e) { } } };
+      try { rec.start(); } catch (e) { cur = null; tip(box, '🎙 음성 입력을 시작하지 못했습니다. ' + kbHint); return; }
+      btn.classList.add('on'); btn.innerHTML = '⏹ 멈추기'; live.textContent = '🔴 듣는 중 — 말씀하세요 (다시 누르면 멈춤)';
+    }
+  }
+  window.STEC_VOICE = { attach, supported: !!SR };
+})();
+
+(function(){ const go=()=>{ const t=document.getElementById('f_content'); if(t) STEC_VOICE.attach(t); }; if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', go); else go(); })();
+</script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
-  "version": "1.5.7",
-  "date": "2026-11-22",
-  "note": "현재 화면(메인 프로그램 카드·하단 배치·사업장 기준정보 연동 등) 기준 PC·휴대폰 배포판",
-  "html": "releases/S-Tec-Complaint-Response-System_v1.5.7.html",
-  "apk": "releases/S-Tec-Complaint-Response-System_v1.5.7.apk"
+  "version": "1.5.8",
+  "date": "2026-11-25",
+  "note": "Complaint 분류 칸을 가운데 넓은 칸으로 옮김(항목 고르기 쉽게), 사업장·접수 정보(고객사명·발생장소·업종·접수경로·접수일·발생일시·제기자·관련근무자)는 오른쪽 영상 아래로 / 「Complaint 내용」 🎙 음성 입력(말하면 글로 입력)",
+  "html": "releases/S-Tec-Complaint-Response-System_v1.5.8.html",
+  "apk": "releases/S-Tec-Complaint-Response-System_v1.5.8.apk"
 }
